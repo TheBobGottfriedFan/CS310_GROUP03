@@ -1,5 +1,3 @@
--- I will Insert TRIGGERS in a separate file.
-
 USE patient_portal;
 SET FOREIGN_KEY_CHECKS = 0;
 
