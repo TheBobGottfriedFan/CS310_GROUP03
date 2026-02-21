@@ -81,7 +81,7 @@ BEGIN
   SELECT 1
   FROM appointments a
   WHERE a.provider_id = NEW.provider_id
-   AND a.status IN ('requested','scheduled','completed')  -- exclude cancelled
+   AND a.status IN ('requested','scheduled','completed') 
    AND NOT (NEW.end_time <= a.start_time OR NEW.start_time >= a.end_time)
  ) THEN
   SIGNAL SQLSTATE '45000'
@@ -203,5 +203,35 @@ BEGIN
    SET MESSAGE_TEXT = 'provider_id must reference user with the roles of either a doctor or a nurse.';
  END IF;
 END$$
+
+DROP TRIGGER IF EXISTS trg_appt_role_enforce_upd$$
+CREATE TRIGGER trg_appt_role_enforce_upd
+BEFORE UPDATE ON appointments
+FOR EACH ROW
+BEGIN
+-- THE PATIENT IS A PATIENT WE HOPE.
+ IF NOT EXISTS (
+  SELECT 1
+  FROM users u
+  JOIN roles r ON r.id = u.role_id
+  WHERE u.id = NEW.patient_id
+   AND r.name = 'patient'
+ ) THEN
+  SIGNAL SQLSTATE '45000'
+   SET MESSAGE_TEXT = 'patient_id must reference user with the role patient.';
+ END IF;
+-- THE PROVIDER MUST BE EITHER A DOCTOR OR A NURSE
+ IF NOT EXISTS (
+  SELECT 1
+  FROM users u
+  JOIN roles r ON r.id = u.role_id
+  WHERE u.id = NEW.provider_id
+   AND r.name IN ('doctor','nurse')
+ ) THEN
+  SIGNAL SQLSTATE '45000'
+   SET MESSAGE_TEXT = 'provider_id must reference user with the role doctor or nurse.';
+ END IF;
+END$$
+
 
 DELIMITER ;
