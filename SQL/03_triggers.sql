@@ -234,4 +234,152 @@ BEGIN
 END$$
 
 
+DROP TRIGGER IF EXISTS trg_appt_immutable_schedule_upd$$
+CREATE TRIGGER trg_appt_immutable_schedule_upd
+BEFORE UPDATE ON appointments
+FOR EACH ROW
+BEGIN
+ IF NEW.patient_id <> OLD.patient_id
+  OR NEW.provider_id <> OLD.provider_id
+  OR NEW.slot_id <> OLD.slot_id
+  OR NEW.start_time <> OLD.start_time
+  OR NEW.end_time <> OLD.end_time
+ THEN
+  SIGNAL SQLSTATE '45000'
+   SET MESSAGE_TEXT = 'Appointments cannot be rescheduled/retargeted (patient/provider/slot/start/end cannot be modified afterwards).';
+ END IF;
+END$$
+
+DROP TRIGGER IF EXISTS trg_appt_no_overlap_upd$$
+CREATE TRIGGER trg_appt_no_overlap_upd
+BEFORE UPDATE ON appointments
+FOR EACH ROW
+BEGIN
+ IF NEW.status IN ('requested','scheduled','completed') THEN
+  IF EXISTS (
+   SELECT 1
+   FROM appointments a
+   WHERE a.provider_id = NEW.provider_id
+    AND a.id <> OLD.id
+    AND a.status IN ('requested','scheduled','completed')
+    AND NOT (NEW.end_time <= a.start_time OR NEW.start_time >= a.end_time)
+  ) THEN
+   SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Provider already has an overlapping appointment (UPDATE).';
+  END IF;
+  IF EXISTS (
+   SELECT 1
+   FROM appointments a
+   WHERE a.patient_id = NEW.patient_id
+    AND a.id <> OLD.id
+    AND a.status IN ('requested','scheduled','completed')
+    AND NOT (NEW.end_time <= a.start_time OR NEW.start_time >= a.end_time)
+  ) THEN
+   SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Patient already has an overlapping appointment (UPDATE).';
+  END IF;
+ END IF;
+END$$
+
+DROP TRIGGER IF EXISTS trg_appt_requires_open_slot_upd$$
+CREATE TRIGGER trg_appt_requires_open_slot_upd
+BEFORE UPDATE ON appointments
+FOR EACH ROW
+BEGIN
+ IF OLD.status = 'cancelled' AND NEW.status IN ('requested','scheduled','completed') THEN
+  IF NOT EXISTS (
+   SELECT 1
+   FROM availability_slots s
+   WHERE s.id = NEW.slot_id
+    AND s.provider_id = NEW.provider_id
+    AND s.status = 'open'
+    AND s.start_time = NEW.start_time
+    AND s.end_time = NEW.end_time
+  ) THEN
+   SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Cannot reactivate appointment: slot must be open and match provider/start/end.';
+  END IF;
+ END IF;
+END$$
+
+DROP TRIGGER IF EXISTS trg_appt_rebook_slot_after_upd$$
+CREATE TRIGGER trg_appt_rebook_slot_after_upd
+AFTER UPDATE ON appointments
+FOR EACH ROW
+BEGIN
+ IF OLD.status = 'cancelled' AND NEW.status IN ('requested','scheduled','completed') THEN
+  UPDATE availability_slots
+  SET status = 'booked'
+  WHERE id = NEW.slot_id;
+ END IF;
+END$$
+
+
+DROP TRIGGER IF EXISTS trg_appt_reopen_slot_after_del$$
+CREATE TRIGGER trg_appt_reopen_slot_after_del
+AFTER DELETE ON appointments
+FOR EACH ROW
+BEGIN
+ UPDATE availability_slots
+ SET status = 'open'
+ WHERE id = OLD.slot_id;
+END$$
+
+
+DROP TRIGGER IF EXISTS trg_audit_appt_ins$$
+CREATE TRIGGER trg_audit_appt_ins
+AFTER INSERT ON appointments
+FOR EACH ROW
+BEGIN
+ INSERT INTO audit_log (entity, entity_id, action, details)
+ VALUES ('appointments', NEW.id, 'INSERT', CONCAT('Created appt id=', NEW.id));
+END$$
+
+DROP TRIGGER IF EXISTS trg_audit_appt_upd$$
+CREATE TRIGGER trg_audit_appt_upd
+AFTER UPDATE ON appointments
+FOR EACH ROW
+BEGIN
+ INSERT INTO audit_log (entity, entity_id, action, details)
+ VALUES ('appointments', NEW.id, 'UPDATE', CONCAT('Updated appt id=', NEW.id, ' status ', OLD.status, ' -> ', NEW.status));
+END$$
+
+DROP TRIGGER IF EXISTS trg_audit_appt_del$$
+CREATE TRIGGER trg_audit_appt_del
+AFTER DELETE ON appointments
+FOR EACH ROW
+BEGIN
+ INSERT INTO audit_log (entity, entity_id, action, details)
+ VALUES ('appointments', OLD.id, 'DELETE', CONCAT('Deleted appt id=', OLD.id));
+END$$
+
+DROP TRIGGER IF EXISTS trg_audit_avail_ins$$
+CREATE TRIGGER trg_audit_avail_ins
+AFTER INSERT ON availability_slots
+FOR EACH ROW
+BEGIN
+ INSERT INTO audit_log (entity, entity_id, action, details)
+ VALUES ('availability_slots', NEW.id, 'INSERT', CONCAT('Created slot id=', NEW.id));
+END$$
+
+DROP TRIGGER IF EXISTS trg_audit_avail_upd$$
+CREATE TRIGGER trg_audit_avail_upd
+AFTER UPDATE ON availability_slots
+FOR EACH ROW
+BEGIN
+ INSERT INTO audit_log (entity, entity_id, action, details)
+ VALUES ('availability_slots', NEW.id, 'UPDATE', CONCAT('Updated slot id=', NEW.id, ' status ', OLD.status, ' -> ', NEW.status));
+END$$
+
+DROP TRIGGER IF EXISTS trg_audit_avail_del$$
+CREATE TRIGGER trg_audit_avail_del
+AFTER DELETE ON availability_slots
+FOR EACH ROW
+BEGIN
+ INSERT INTO audit_log (entity, entity_id, action, details)
+ VALUES ('availability_slots', OLD.id, 'DELETE', CONCAT('Deleted slot id=', OLD.id));
+END$$
+
+
+ 
 DELIMITER ;
