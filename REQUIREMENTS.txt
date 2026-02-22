@@ -1,5 +1,5 @@
 
 2. For setting SECRET_KEYS:
-1. pip instal python-dotenv
-2. create .env file in the project root folder -> DJANGO_SECRET_KEY=your-generated-key-here [in the MAIN FOLDER, create the .env file]
-3. Inside the .env: DJANGO_SECRET_KEY=your_generated_secret_key_here
+A. pip instal python-dotenv
+B. create .env file in the project root folder -> DJANGO_SECRET_KEY=your-generated-key-here [in the MAIN FOLDER, create the .env file]
+C. Inside the .env: DJANGO_SECRET_KEY=your_generated_secret_key_here
