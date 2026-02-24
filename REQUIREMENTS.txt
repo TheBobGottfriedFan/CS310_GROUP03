@@ -7,6 +7,6 @@ mysql-connector-python ≥ 8.0
 bcrypt ≥ 4.0
 
 2. For setting SECRET_KEYS:
-A. pip instal python-dotenv
+A. pip install python-dotenv
 B. create .env file in the project root folder -> DJANGO_SECRET_KEY=your-generated-key-here [in the MAIN FOLDER, create the .env file]
 C. Inside the .env: DJANGO_SECRET_KEY=your_generated_secret_key_here
