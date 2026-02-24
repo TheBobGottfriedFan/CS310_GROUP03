@@ -1,14 +1,27 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard</title>
+    <title>Patient Dashboard</title>
+    <link rel="stylesheet" href="{% static 'portal/styles.css' %}">
 </head>
-
 <body>
+<div class="login-box" style="width: 600px;">
     <h1>Dashboard</h1>
+    <p>Welcome, {{ username }}!</p>
+    <hr>
+    <h3>Quick Actions</h3>
+    <ul style="text-align: left;">
+        <li><a href="#">View Appointments</a></li>
+        <li><a href="#">Medical Records</a></li>
+        <li><a href="#">Messages</a></li>
+        <li><a href="#">Profile Settings</a></li>
+    </ul>
+    <br>
+    <a href="{% url 'logout' %}">
+        <button type="button">Logout</button>
+    </a>
+</div>
 
-    <p>Welcome, Patient!</p>
-
-    <a href="/login/">Logout</a>
 </body>
 </html>
