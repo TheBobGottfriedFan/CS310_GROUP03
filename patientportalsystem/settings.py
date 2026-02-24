@@ -87,6 +87,10 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # PRIMARILY FIELD KEY
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+AUTHENTICATION_BACKENDS = [
+    "portal.backends.SQLBcryptBackend",
+]
+
 # Security Debugging Tools
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
