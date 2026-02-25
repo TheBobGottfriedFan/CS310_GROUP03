@@ -1,5 +1,5 @@
-from __future__ import annotations
 import bcrypt
+from __future__ import annotations
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import User
 from .db import get_connection
@@ -19,8 +19,10 @@ class SQLBcryptBackend(BaseBackend):
             else:
                 ip_address = request.META.get("REMOTE_ADDR", "") or ""
             user_agent = request.META.get("HTTP_USER_AGENT", "") or ""
-        conn = get_connection()
+        row = None
+        conn = None
         try:
+            conn = get_connection()
             cur = conn.cursor(dictionary=True)
             cur.execute(
                 """
@@ -33,7 +35,8 @@ class SQLBcryptBackend(BaseBackend):
             )
             row = cur.fetchone()
         finally:
-            conn.close()
+            if conn:
+                conn.close()
         if not row:
             return None
         sql_user_id = int(row["id"])
@@ -42,8 +45,12 @@ class SQLBcryptBackend(BaseBackend):
         if not is_active:
             self._log_login_attempt(sql_user_id, ip_address, user_agent, success=False)
             return None
+        stored_hash = row.get("password_hash")
+        if not stored_hash or not isinstance(stored_hash, str) or not stored_hash.startswith("$2"):
+            self._log_login_attempt(sql_user_id, ip_address, user_agent, success=False)
+            return None
         try:
-            ok = bcrypt.checkpw(password.encode("utf-8"), row["password_hash"].encode("utf-8"))
+            ok = bcrypt.checkpw(password.encode("utf-8"), stored_hash.encode("utf-8"))
         except Exception:
             ok = False
         self._log_login_attempt(sql_user_id, ip_address, user_agent, success=ok)
@@ -83,10 +90,10 @@ class SQLBcryptBackend(BaseBackend):
             return User.objects.get(pk=user_id)
         except User.DoesNotExist:
             return None
-
     def _log_login_attempt(self, user_id: int, ip_address: str, user_agent: str, success: bool) -> None:
-        conn = get_connection()
+        conn = None
         try:
+            conn = get_connection()
             cur = conn.cursor()
             cur.execute(
                 """
@@ -96,4 +103,5 @@ class SQLBcryptBackend(BaseBackend):
                 (user_id, ip_address, (user_agent or "")[:255], int(success)),
             )
         finally:
-            conn.close()
+            if conn:
+                conn.close()
