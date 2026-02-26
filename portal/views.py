@@ -71,3 +71,43 @@ def logout_view(request):
     logout(request) 
     request.session.flush() 
     return redirect("login")
+
+@require_login
+def settings_view(request):
+    context = {
+        "username": request.session.get("display_name") or request.session.get("email"),
+    }
+    return render(request, "portal/settings.html", context)
+
+
+@require_login
+def privacy_view(request):
+    context = {
+        "username": request.session.get("display_name") or request.session.get("email"),
+    }
+    return render(request, "portal/privacy.html", context)
+
+
+@require_login
+def messages_view(request):
+    context = {
+        "username": request.session.get("display_name") or request.session.get("email"),
+        "messages": [],  # placeholder until messaging is implemented
+    }
+    return render(request, "portal/messages.html", context)
+
+
+@require_login
+def data_control_view(request):
+    context = {
+        "username": request.session.get("display_name") or request.session.get("email"),
+    }
+    return render(request, "portal/data_control.html", context)
+
+
+@require_login
+def profile_view(request):
+    context = {
+        "username": request.session.get("display_name") or request.session.get("email"),
+    }
+    return render(request, "portal/profile.html", context)
