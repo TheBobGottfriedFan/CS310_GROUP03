@@ -12,5 +12,6 @@ urlpatterns = [
     path("data-control/", views.data_control_view, name="data_control"),
     path("profile/", views.profile_view, name="profile"),
     path("notifications/", views.notifications_view, name="notifications"),
-    path("notifications/mark-read/", views.mark_notification_read, name="mark_notification_read"),
+    path("notifications/<int:notif_id>/read/", views.notification_mark_read, name="notification_mark_read"),
+    path("notifications/read-all/", views.notifications_mark_all_read, name="notifications_mark_all_read"),
 ]
