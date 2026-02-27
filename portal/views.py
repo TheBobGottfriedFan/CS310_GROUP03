@@ -111,3 +111,52 @@ def profile_view(request):
         "username": request.session.get("display_name") or request.session.get("email"),
     }
     return render(request, "portal/profile.html", context)
+
+
+from django.views.decorators.http import require_http_methods
+from .notification_service import (
+    get_unread_count,
+    list_notifications,
+    mark_read,
+    mark_all_read,
+)
+
+@require_login
+def dashboard_view(request):
+    user_id = int(request.session["user_id"])
+
+    context = {
+        "username": request.session.get("display_name") or request.session.get("email"),
+        "appointments": [],  # placeholder
+        "notif_unread_count": get_unread_count(user_id),
+        "notif_preview": list_notifications(user_id, limit=5),
+    }
+    return render(request, "portal/dashboard.html", context)
+    
+
+@require_login
+def notifications_view(request):
+    user_id = int(request.session["user_id"])
+    context = {
+        "username": request.session.get("display_name") or request.session.get("email"),
+        "notif_unread_count": get_unread_count(user_id),
+        "notifications": list_notifications(user_id),
+    }
+    return render(request, "portal/notifications.html", context)
+
+
+@require_login
+@require_http_methods(["POST"])
+def notification_mark_read(request, notif_id: int):
+    user_id = int(request.session["user_id"])
+    mark_read(user_id=user_id, notif_id=notif_id)
+    return redirect("notifications")
+    
+
+@require_login
+@require_http_methods(["POST"])
+def notifications_mark_all_read(request):
+    user_id = int(request.session["user_id"])
+    mark_all_read(user_id=user_id)
+    return redirect("notifications")
+
