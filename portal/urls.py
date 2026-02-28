@@ -15,9 +15,11 @@ urlpatterns = [
     path("notifications/<int:notif_id>/read/", views.notification_mark_read, name="notification_mark_read"),
     path("notifications/read-all/", views.notifications_mark_all_read, name="notifications_mark_all_read"),
     path("patient/profile/<int:patient_id>/", views.view_patient_profile_view, name="view_patient_profile"),
+    path("patient/file/<int:patient_id>/", views.access_patient_file_view, name="access_patient_file"),
 
     # Remove Later.
     path("admin/login-history/", views.view_login_history_view, name="view_login_history"),
     path("admin/users/", views.manage_users_view, name="manage_users"),
+    path("admin/sessions/", views.manage_sessions_view, name="manage_sessions"),
     path("admin/roles/", views.manage_roles_permissions_view, name="manage_roles_permissions")
 ]
