@@ -4,7 +4,6 @@ from typing import Callable, Any
 from django.shortcuts import redirect
 from django.http import HttpResponseForbidden
 
-
 ACCESS_PATIENT_FILE = "access_patient_file"
 UPDATE_PATIENT_PROFILE = "update_patient_profile"
 VIEW_LOGIN_HISTORY = "view_login_history"
