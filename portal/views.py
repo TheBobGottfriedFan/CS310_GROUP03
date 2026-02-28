@@ -11,6 +11,12 @@ from .authentication_service import (
     revoke_sql_session,
     get_permissions_for_role,
 )
+from .notification_service import (
+    get_unread_count,
+    list_notifications,
+    mark_read,
+    mark_all_read,
+)
 
 
 def _get_client_ip(request) -> str:
@@ -113,15 +119,6 @@ def profile_view(request):
         "username": request.session.get("display_name") or request.session.get("email"),
     }
     return render(request, "portal/profile.html", context)
-
-
-from django.views.decorators.http import require_http_methods
-from .notification_service import (
-    get_unread_count,
-    list_notifications,
-    mark_read,
-    mark_all_read,
-)
 
 @require_login
 def dashboard_view(request):
