@@ -3,7 +3,9 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login, logout
-from .rbac import require_login
+from .rbac import (
+    require_login, require_permission, require_any_permission, ACCESS_PATIENT_FILE, UPDATE_PATIENT_PROFILE, VIEW_LOGIN_HISTORY, VIEW_MESSAGES, REQUEST_APPOINTMENT, VIEW_PATIENT_PROFILE, MANAGE_SESSIONS, MANAGE_AVAILABILITY, MANAGE_APPOINTMENTS, CANCEL_APPOINTMENT, CREATE_MEDICAL_RECORD, UPDATE_MEDICAL_RECORD, SEND_MESSAGES, MANAGE_NOTIFICATIONS, VIEW_PRESCRIPTIONS, MANAGE_PRESCRIPTIONS, REQUEST_REFILL, APPROVE_REFILL, VIEW_INSURANCE, MANAGE_INSURANCE, MANAGE_USERS, MANAGE_ROLES_PERMISSIONS,
+)
 from .authentication_service import (
     create_sql_session,
     revoke_sql_session,
