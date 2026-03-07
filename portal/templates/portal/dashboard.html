@@ -1,27 +1,100 @@
-{% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Patient Dashboard</title>
-    <link rel="stylesheet" href="{% static 'portal/styles.css' %}">
-</head>
-<body>
-<div class="login-box" style="width: 600px;">
-    <h1>Dashboard</h1>
-    <p>Welcome, {{ username }}!</p>
-    <hr>
-    <h3>Quick Actions</h3>
-    <ul style="text-align: left;">
-        <li><a href="#">View Appointments</a></li>
-        <li><a href="#">Medical Records</a></li>
-        <li><a href="#">Messages</a></li>
-        <li><a href="#">Profile Settings</a></li>
-    </ul>
-    <br>
-    <a href="{% url 'logout' %}">
-        <button type="button">Logout</button>
+{% extends "portal/base.html" %}
+
+{% block title %}Dashboard | Patient Portal{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Good to see you, {{ username }} 👋</h1>
+<p class="muted" style="margin: 0 0 22px 0;">Here's a summary of your health portal activity.</p>
+
+<!-- Stat Cards -->
+<div class="stat-grid">
+    <a class="stat-card" href="#">
+        <div class="stat-icon teal">📅</div>
+        <div>
+            <div class="stat-label">Next Appointment</div>
+            {% if appointments and appointments|length > 0 %}
+                <div class="stat-value">{{ appointments.0.date }}</div>
+                <div class="stat-sub">{{ appointments.0.provider }}</div>
+            {% else %}
+                <div class="stat-value" style="font-size:1rem; color:var(--ink-soft);">None scheduled</div>
+                <div class="stat-sub">Book your next visit</div>
+            {% endif %}
+        </div>
+    </a>
+
+    <a class="stat-card" href="{% url 'portal:messages' %}">
+        <div class="stat-icon amber">💬</div>
+        <div>
+            <div class="stat-label">Messages</div>
+            <div class="stat-value">
+                {% if messages %}{{ messages|length }}{% else %}0{% endif %}
+            </div>
+            <div class="stat-sub">From your care team</div>
+        </div>
+    </a>
+
+    <a class="stat-card" href="{% url 'portal:profile' %}">
+        <div class="stat-icon rose">🧾</div>
+        <div>
+            <div class="stat-label">Profile</div>
+            <div class="stat-value" style="font-size:1rem;">View Info</div>
+            <div class="stat-sub">Account & contact details</div>
+        </div>
     </a>
 </div>
 
-</body>
-</html>
+<!-- Main dashboard area -->
+<div class="dash-grid">
+    <!-- Next Appointment detail -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">📅 Upcoming Appointment</h3>
+            <a class="btn btn-secondary btn-sm" href="#">Schedule</a>
+        </div>
+
+        {% if appointments and appointments|length > 0 %}
+            <div style="padding: 14px; background: var(--teal-light); border-radius: var(--radius-sm); border: 1px solid rgba(13,148,136,0.2);">
+                <p style="margin:0 0 6px 0; font-size:1.05rem; font-weight:800;">{{ appointments.0.date }} — {{ appointments.0.time }}</p>
+                <p class="muted" style="margin: 4px 0; font-size:0.93rem;">🩺 Provider: <strong>{{ appointments.0.provider }}</strong></p>
+                <p class="muted" style="margin: 4px 0; font-size:0.93rem;">📍 Location: {{ appointments.0.location }}</p>
+            </div>
+            <a class="btn" href="#" style="margin-top:14px;">View All Appointments</a>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📋</div>
+                <h3>No upcoming appointments</h3>
+                <p>Your next scheduled visit will appear here once booked.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Quick links + status -->
+    <div class="card">
+        <h3 class="card-title" style="margin-bottom:14px;">⚡ Quick Links</h3>
+        <ul class="action-list">
+            <li><a href="{% url 'portal:messages' %}">💬 Messages</a></li>
+            <li><a href="{% url 'portal:settings' %}">⚙️ Account Settings</a></li>
+            <li><a href="{% url 'portal:privacy' %}">🔒 Privacy</a></li>
+            <li><a href="{% url 'portal:data_control' %}">🗂️ Data Control</a></li>
+        </ul>
+
+        <hr>
+
+        <h3 class="card-title" style="margin-bottom:12px;">🟢 System Status</h3>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.9rem; color:var(--ink-mid);">Portal</span>
+                <span class="badge badge-green">● Online</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.9rem; color:var(--ink-mid);">Messaging</span>
+                <span class="badge badge-green">● Active</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.9rem; color:var(--ink-mid);">Build</span>
+                <span class="badge badge-amber">Prototype v1</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
