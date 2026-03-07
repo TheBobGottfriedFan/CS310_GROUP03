@@ -1,7 +1,51 @@
-<h2>Messages</h2>
+{% extends "portal/base.html" %}
 
-<p>Hello {{ username }}</p>
+{% block title %}Messages | Patient Portal{% endblock %}
 
-<p>No messages yet.</p>
+{% block content %}
+<h1 class="page-title">Messages</h1>
+<p class="muted" style="margin: 0 0 22px 0;">Secure messages between you and your care team.</p>
 
-<a href="/dashboard/">Back</a>
+<div class="card">
+    <div class="card-header">
+        <h3 class="card-title">💬 Inbox</h3>
+        <a class="btn btn-sm" href="#">+ New Message</a>
+    </div>
+
+    <hr>
+
+    {% if messages and messages|length > 0 %}
+        {% for m in messages %}
+            <div class="message-item {% if not m.read %}unread{% endif %}">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px;">
+                    <p class="message-subject">
+                        {% if not m.read %}<span class="badge badge-teal" style="margin-right:6px; font-size:0.75rem;">New</span>{% endif %}
+                        {{ m.subject }}
+                    </p>
+                    <span class="muted" style="font-size:0.85rem; white-space:nowrap;">{{ m.date }}</span>
+                </div>
+                <div class="message-meta">
+                    <span>From: <strong>{{ m.from }}</strong></span>
+                </div>
+                <p class="message-preview">{{ m.preview }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">✉️</div>
+            <h3>Your inbox is empty</h3>
+            <p>Messages from your care team will appear here.</p>
+        </div>
+
+        <div class="info-box teal" style="margin-top: 16px;">
+            <strong>💡 You can use messages to:</strong>
+            <ul style="margin: 8px 0 0 18px; padding:0;">
+                <li>Ask your doctor about symptoms or concerns</li>
+                <li>Request prescription refills</li>
+                <li>Receive lab result notifications</li>
+                <li>Get appointment reminders</li>
+            </ul>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
