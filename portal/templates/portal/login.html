@@ -1,22 +1,62 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Patient Login</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In | Patient Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="{% static 'portal/styles.css' %}">
 </head>
-<body>
-<div class="login-box">
-    <h2>Patient Portal</h2>
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
-    <form method="POST">
-        {% csrf_token %}
-        <input type="text" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Login</button>
-    </form>
-</div>
+
+<body class="auth-page">
+    <div class="login-box login-box-lg">
+        <div class="login-header">
+            <div class="logo-badge">🩺</div>
+            <h2>Welcome back</h2>
+            <p class="muted" style="margin: 6px 0 0 0; font-size: 0.95rem;">
+                Sign in to access your health portal.
+            </p>
+        </div>
+
+        {% if error %}
+            <div class="alert">⚠️ {{ error }}</div>
+        {% endif %}
+
+        <form method="POST" autocomplete="on">
+            {% csrf_token %}
+
+            <label class="field-label" for="username">Username or Email</label>
+            <input
+                id="username"
+                type="text"
+                name="email"
+                placeholder="Enter your username or email"
+                autocomplete="username"
+                required
+            />
+
+            <label class="field-label" for="password">Password</label>
+            <div class="password-row">
+                <input
+                    id="password"
+                    type="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                />
+            </div>
+
+            <button type="submit">Sign In →</button>
+        </form>
+
+        <div class="login-footer">
+            <p class="muted" style="margin: 0; font-size: 0.85rem;">
+                🔒 Your health information is protected and encrypted.
+            </p>
+        </div>
+    </div>
 </body>
 </html>
