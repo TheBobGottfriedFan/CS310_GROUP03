@@ -1,6 +1,56 @@
-<h2>Data Control</h2>
-<p>User: {{ username }}</p>
+{% extends "portal/base.html" %}
 
-<p>Export / delete data placeholder.</p>
+{% block title %}Data Control | Patient Portal{% endblock %}
 
-<a href="/dashboard/">Back</a>
+{% block content %}
+<h1 class="page-title">Data Control</h1>
+<p class="muted" style="margin: 0 0 22px 0;">Manage, export, or delete your personal data.</p>
+
+<div class="card">
+    <!-- Export -->
+    <h3 class="card-title">📥 Export Your Data</h3>
+    <p class="muted" style="margin: 8px 0 14px 0; font-size:0.93rem;">
+        Download a full copy of your portal data including appointments, messages, and account details.
+    </p>
+    <a class="btn" href="#">⬇️ Download My Data</a>
+
+    <hr>
+
+    <!-- Correction -->
+    <h3 class="card-title">✏️ Request Data Correction</h3>
+    <p class="muted" style="margin: 8px 0 14px 0; font-size:0.93rem;">
+        If any of your information is incorrect, submit a correction request to your care team.
+    </p>
+    <a class="btn btn-secondary" href="#">📝 Request Correction</a>
+
+    <hr>
+
+    <!-- Session -->
+    <h3 class="card-title">🔐 Session & Security</h3>
+    <p class="muted" style="margin: 8px 0 14px 0; font-size:0.93rem;">
+        If you believe your account has been compromised, immediately change your password or contact support.
+    </p>
+    <a class="btn btn-secondary" href="{% url 'portal:settings' %}">⚙️ Go to Settings</a>
+
+    <hr>
+
+    <!-- Danger zone -->
+    <h3 class="card-title" style="color: #9f1239;">⚠️ Danger Zone</h3>
+    <p class="muted" style="margin: 8px 0 14px 0; font-size:0.93rem;">
+        These actions are permanent in a live system. The buttons below are placeholders for this prototype.
+    </p>
+
+    <div class="info-box red" style="margin-bottom: 16px;">
+        <strong>Warning:</strong> Account deletion permanently removes all your data and cannot be undone.
+    </div>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="btn btn-secondary" href="#" onclick="return confirm('Deactivate your account? (Prototype — no action taken)')">
+            Deactivate Account
+        </a>
+        <a class="btn btn-danger" href="#" onclick="return confirm('Permanently delete your account? (Prototype — no action taken)')">
+            🗑️ Request Deletion
+        </a>
+    </div>
+</div>
+{% endblock %}
