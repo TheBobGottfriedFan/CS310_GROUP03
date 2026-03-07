@@ -1,6 +1,58 @@
-<h2>Privacy Settings</h2>
-<p>User: {{ username }}</p>
+{% extends "portal/base.html" %}
 
-<p>Privacy controls coming soon.</p>
+{% block title %}Privacy | Patient Portal{% endblock %}
 
-<a href="/dashboard/">Back</a>
+{% block content %}
+<h1 class="page-title">Privacy</h1>
+<p class="muted" style="margin: 0 0 22px 0;">How your personal health information is handled and protected.</p>
+
+<div class="card">
+    <div class="info-box teal" style="margin-bottom: 20px;">
+        🔒 This portal is designed to protect your Personal Health Information (PHI) in accordance with best practices.
+    </div>
+
+    <h3 class="card-title">📦 Data We Store</h3>
+    <ul style="margin: 12px 0 0 20px; display:flex; flex-direction:column; gap:6px; color: var(--ink-mid);">
+        <li>Account information (username, email, role)</li>
+        <li>Login history (timestamps, IP address, device info)</li>
+        <li>Secure messages with your care team</li>
+        <li>Appointment records (when implemented)</li>
+    </ul>
+
+    <hr>
+
+    <h3 class="card-title">🛡️ Security Controls</h3>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:12px;">
+        <div style="padding:12px 14px; background:var(--sand); border-radius:var(--radius-sm); border:1px solid var(--border);">
+            <p style="margin:0; font-weight:700; font-size:0.9rem;">🔑 Password Hashing</p>
+            <p class="muted" style="margin:4px 0 0 0; font-size:0.85rem;">bcrypt with salt rounds</p>
+        </div>
+        <div style="padding:12px 14px; background:var(--sand); border-radius:var(--radius-sm); border:1px solid var(--border);">
+            <p style="margin:0; font-weight:700; font-size:0.9rem;">👥 Role-Based Access</p>
+            <p class="muted" style="margin:4px 0 0 0; font-size:0.85rem;">RBAC — patients, providers, admins</p>
+        </div>
+        <div style="padding:12px 14px; background:var(--sand); border-radius:var(--radius-sm); border:1px solid var(--border);">
+            <p style="margin:0; font-weight:700; font-size:0.9rem;">⏱️ Session Expiration</p>
+            <p class="muted" style="margin:4px 0 0 0; font-size:0.85rem;">Auto logout + session invalidation</p>
+        </div>
+        <div style="padding:12px 14px; background:var(--sand); border-radius:var(--radius-sm); border:1px solid var(--border);">
+            <p style="margin:0; font-weight:700; font-size:0.9rem;">🛡️ CSRF Protection</p>
+            <p class="muted" style="margin:4px 0 0 0; font-size:0.85rem;">All forms include CSRF tokens</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <h3 class="card-title">✋ Your Rights & Control</h3>
+    <p class="muted" style="margin: 8px 0 14px 0; font-size:0.93rem;">
+        You have the right to view, export, correct, and request deletion of your data at any time.
+    </p>
+    <a class="btn" href="{% url 'portal:data_control' %}">🗂️ Go to Data Control</a>
+
+    <hr>
+
+    <div class="info-box amber">
+        ⚠️ <strong>Prototype Note:</strong> A production system would include full HIPAA compliance language, audit logging, encryption at rest, and a signed Business Associate Agreement (BAA).
+    </div>
+</div>
+{% endblock %}
