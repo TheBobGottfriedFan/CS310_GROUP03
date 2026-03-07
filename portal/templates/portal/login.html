@@ -8,10 +8,108 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="{% static 'portal/styles.css' %}">
+    <style>
+        .video-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .video-bg video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+        .video-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            background: linear-gradient(
+                135deg,
+                rgba(10, 30, 28, 0.72) 0%,
+                rgba(13, 60, 55, 0.65) 50%,
+                rgba(10, 30, 28, 0.75) 100%
+            );
+            backdrop-filter: blur(1.5px);
+            pointer-events: none;
+        }
+        body.auth-page {
+            position: relative;
+            z-index: 10;
+            background: transparent;
+        }
+        .login-box {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.35);
+            animation: fadeUp 0.6s ease both;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .video-branding {
+            position: fixed;
+            top: 26px; left: 30px;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn 1s ease both;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        .video-branding-icon {
+            width: 38px; height: 38px;
+            background: rgba(255,255,255,0.15);
+            border: 1.5px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            backdrop-filter: blur(8px);
+        }
+        .video-branding-text {
+            font-family: 'Lora', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.92);
+            letter-spacing: 0.01em;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
+        .video-footer {
+            position: fixed;
+            bottom: 20px;
+            left: 0; right: 0;
+            text-align: center;
+            z-index: 3;
+            color: rgba(255,255,255,0.45);
+            font-size: 0.8rem;
+            letter-spacing: 0.03em;
+        }
+    </style>
 </head>
-
 <body class="auth-page">
-    <div class="login-box login-box-lg">
+
+    <div class="video-bg">
+        <video autoplay muted loop playsinline>
+            <source src="{% static 'portal/hospital.mp4' %}" type="video/mp4">
+        </video>
+    </div>
+
+    <div class="video-overlay"></div>
+
+    <div class="video-branding">
+        <div class="video-branding-icon">🩺</div>
+        <span class="video-branding-text">Patient Portal</span>
+    </div>
+
+    <div class="login-box login-box-lg" style="position:relative; z-index:20;">
         <div class="login-header">
             <div class="logo-badge">🩺</div>
             <h2>Welcome back</h2>
@@ -58,5 +156,10 @@
             </p>
         </div>
     </div>
+
+    <div class="video-footer">
+        Secure Patient Portal &nbsp;·&nbsp; Protected Health Information
+    </div>
+
 </body>
 </html>
