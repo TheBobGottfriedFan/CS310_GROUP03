@@ -1,13 +1,58 @@
-<h2>Settings</h2>
+{% extends "portal/base.html" %}
 
-<p>Welcome {{ username }}</p>
+{% block title %}Settings | Patient Portal{% endblock %}
 
-<ul>
-  <li><a href="/dashboard/">Dashboard</a></li>
-  <li><a href="/privacy/">Privacy</a></li>
-  <li><a href="/messages/">Messages</a></li>
-  <li><a href="/profile/">Profile</a></li>
-  <li><a href="/logout/">Logout</a></li>
-</ul>
+{% block content %}
+<h1 class="page-title">Account Settings</h1>
+<p class="muted" style="margin: 0 0 22px 0;">Manage your profile, security, and preferences.</p>
 
-<p>Settings page placeholder</p>
+<div class="card">
+    <!-- Profile section -->
+    <h3 class="card-title">🧾 Profile Information</h3>
+    <div style="margin-top: 14px;">
+        <div class="profile-field">
+            <span class="profile-field-label">Name</span>
+            <span class="profile-field-value">{{ username }}</span>
+        </div>
+        <div class="profile-field">
+            <span class="profile-field-label">Email</span>
+            <span class="profile-field-value">{{ request.session.email }}</span>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Security section -->
+    <h3 class="card-title">🔐 Security</h3>
+    <p class="muted" style="margin: 8px 0 14px 0; font-size:0.93rem;">Keep your account safe with a strong password and two-factor authentication.</p>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn" type="button" onclick="alert('Change Password — coming soon!')">🔑 Change Password</button>
+        <button class="btn btn-secondary" type="button" onclick="alert('2FA — coming soon!')">🛡️ Enable 2FA</button>
+    </div>
+
+    <hr>
+
+    <!-- Notifications section -->
+    <h3 class="card-title">🔔 Notifications</h3>
+    <p class="muted" style="margin: 8px 0 14px 0; font-size:0.93rem;">Choose how you want to be notified about appointments and messages.</p>
+
+    <div style="display:flex; flex-direction:column; gap:10px;">
+        <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-weight:600; font-size:0.93rem;">
+            <input type="checkbox" checked style="width:auto; accent-color: var(--teal);" />
+            Email notifications for new messages
+        </label>
+        <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-weight:600; font-size:0.93rem;">
+            <input type="checkbox" checked style="width:auto; accent-color: var(--teal);" />
+            Appointment reminders (24 hours before)
+        </label>
+        <label style="display:flex; align-items:center; gap:12px; cursor:pointer; font-weight:600; font-size:0.93rem;">
+            <input type="checkbox" style="width:auto; accent-color: var(--teal);" />
+            SMS reminders (when phone number is set)
+        </label>
+    </div>
+
+    <div class="info-box amber" style="margin-top: 16px;">
+        ⚠️ Notification settings are display-only in this prototype and are not yet saved.
+    </div>
+</div>
+{% endblock %}
