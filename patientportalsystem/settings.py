@@ -12,13 +12,11 @@ load_dotenv(BASE_DIR / ".env")
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 if not SECRET_KEY:
     raise ValueError("DJANGO_SECRET_KEY not set in the root .env file")
-
-# DEBUG should come from .env so teammates can easily switch it
+# DEBUG should come from .env
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
-
 ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
-# Definitions
+# DEFINING
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -44,7 +42,7 @@ ROOT_URLCONF = "patientportalsystem.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],  # App templates auto-discovered
+        "DIRS": [], 
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -59,7 +57,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "patientportalsystem.wsgi.application"
 
-# MySQL Database (uses mysql-connector-python)
+# MySQL Database (mysql-connector-python)
 DATABASES = {
     "default": {
         "ENGINE": "mysql.connector.django",
@@ -74,21 +72,19 @@ DATABASES = {
     }
 }
 
-# Languages
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "America/New_York"
 USE_I18N = True
 USE_TZ = True
 
-# Static Files
+# STATIC
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # PRIMARY FIELD KEY
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# Authentication backends:
-# Keep Django's default so admin/login always works, AND keep your custom SQL backend.
+# BACKEND AUTH
 AUTHENTICATION_BACKENDS = [
     "portal.backend.SQLBcryptBackend",
     "django.contrib.auth.backends.ModelBackend",
@@ -101,12 +97,12 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# Login / Logout behavior (prototype friendly)
+# Login and Logout 
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/dashboard/"
 LOGOUT_REDIRECT_URL = "/login/"
 
-# Security Debugging Tools
+# Debugging 
 if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
