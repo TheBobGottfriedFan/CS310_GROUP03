@@ -1,9 +1,8 @@
-/* ===== Google Fonts — SF Pro feel via Plus Jakarta Sans + DM Sans ===== */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap');
 
 :root {
   /* Teal palette */
-  --teal-50:  #f0fdfa;
+  --teal-50: #f0fdfa;
   --teal-100: #ccfbf1;
   --teal-200: #99f6e4;
   --teal-300: #5eead4;
@@ -14,8 +13,8 @@
   --teal-800: #115e59;
   --teal-900: #134e4a;
 
-  /* Neutrals */
-  --gray-50:  #f8fafc;
+  /* Grey */
+  --gray-50: #f8fafc;
   --gray-100: #f1f5f9;
   --gray-200: #e2e8f0;
   --gray-300: #cbd5e1;
@@ -26,43 +25,38 @@
   --gray-800: #1e293b;
   --gray-900: #0f172a;
 
-  /* Accents */
-  --blue:       #3b82f6;
+  /* Colors */
+  --blue: #3b82f6;
   --blue-light: #eff6ff;
-  --amber:      #f59e0b;
+  --amber: #f59e0b;
   --amber-light:#fffbeb;
-  --rose:       #f43f5e;
+  --rose: #f43f5e;
   --rose-light: #fff1f2;
-  --green:      #10b981;
+  --green: #10b981;
   --green-light:#ecfdf5;
 
   /* Semantic */
-  --bg:        #f8fafc;
-  --surface:   #ffffff;
-  --border:    #e2e8f0;
-  --text:      #0f172a;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #0f172a;
   --text-soft: #475569;
-  --text-muted:#94a3b8;
+  --text-muted: #94a3b8;
 
   /* Sidebar */
-  --sidebar-bg:      #0d9488;
-  --sidebar-active:  rgba(255,255,255,0.18);
-  --sidebar-hover:   rgba(255,255,255,0.10);
-  --sidebar-text:    rgba(255,255,255,0.85);
+  --sidebar-bg: #0d9488;
+  --sidebar-active: rgba(255,255,255,0.18);
+  --sidebar-hover: rgba(255,255,255,0.10);
+  --sidebar-text: rgba(255,255,255,0.85);
   --sidebar-active-text: #ffffff;
-
-  /* Radius */
   --r-sm: 8px;
   --r-md: 14px;
   --r-lg: 20px;
   --r-xl: 28px;
-
-  /* Shadow */
   --shadow-xs: 0 1px 3px rgba(15,23,42,0.06);
   --shadow-sm: 0 2px 8px rgba(15,23,42,0.08);
   --shadow-md: 0 8px 24px rgba(15,23,42,0.10);
   --shadow-lg: 0 20px 48px rgba(15,23,42,0.14);
-
   --font: 'Plus Jakarta Sans', sans-serif;
   --font-body: 'DM Sans', sans-serif;
 }
