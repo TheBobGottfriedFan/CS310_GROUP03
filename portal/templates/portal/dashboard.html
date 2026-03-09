@@ -22,17 +22,17 @@
   ">
     <div>
       <h1 style="font-family:var(--font); font-size:1.5rem; font-weight:900; letter-spacing:-0.03em; color:var(--gray-900); margin:0 0 3px 0;">
-        Hello, {{ username }} 👋
+        Hello, {{ username }}
       </h1>
       <p class="muted" style="margin:0; font-size:0.88rem;">Here's your health summary for today.</p>
     </div>
     <div style="display:flex; gap:10px;">
-      <a class="btn btn-secondary btn-sm" href="{% url 'portal:profile' %}">👤 Profile</a>
-      <a class="btn btn-sm" href="#">📅 Book Appointment</a>
+      <a class="btn btn-secondary btn-sm" href="{% url 'portal:profile' %}">Profile</a>
+      <a class="btn btn-sm" href="#">Book Appointment</a>
     </div>
   </div>
 
-  <!-- Top 4 stat cards -->
+
   <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:0; border-bottom:1px solid var(--border);">
 
     <!-- Appointment — teal gradient -->
