@@ -6,8 +6,8 @@
 
   <!-- Header -->
   <div style="padding:22px 28px; border-bottom:1px solid var(--border); background:linear-gradient(135deg,var(--teal-50) 0%,white 60%);">
-    <h1 style="font-family:var(--font); font-size:1.5rem; font-weight:900; letter-spacing:-0.03em; color:var(--gray-900); margin:0 0 3px;">🗂️ Data Control</h1>
-    <p class="muted" style="margin:0; font-size:0.88rem;">Manage, export, or delete your personal data.</p>
+    <h1 style="font-family:var(--font); font-size:1.5rem; font-weight:900; letter-spacing:-0.03em; color:var(--gray-900); margin:0 0 3px;">Data Control</h1>
+    <p class="muted" style="margin:0; font-size:0.88rem;">Manage your personal data.</p>
   </div>
 
   <!-- Stats row -->
@@ -28,32 +28,30 @@
 
   <!-- Body: 2 col -->
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
-
-    <!-- Left: export + correction + session -->
     <div style="padding:28px; border-right:1px solid var(--border);">
 
       <div style="margin-bottom:24px; padding-bottom:24px; border-bottom:1px solid var(--gray-100);">
         <h3 style="font-family:var(--font); font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin:0 0 8px;">📥 Export Your Data</h3>
         <p style="font-size:0.88rem; color:var(--text-soft); margin:0 0 14px; line-height:1.6;">Download a full copy of your portal data including appointments, messages, and account details.</p>
-        <a class="btn btn-sm" href="#">⬇️ Download My Data</a>
+        <a class="btn btn-sm" href="#">Download Data</a>
       </div>
 
       <div style="margin-bottom:24px; padding-bottom:24px; border-bottom:1px solid var(--gray-100);">
         <h3 style="font-family:var(--font); font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin:0 0 8px;">✏️ Request Correction</h3>
         <p style="font-size:0.88rem; color:var(--text-soft); margin:0 0 14px; line-height:1.6;">If any of your information is incorrect, submit a correction request to your care team.</p>
-        <a class="btn btn-secondary btn-sm" href="#">📝 Request Correction</a>
+        <a class="btn btn-secondary btn-sm" href="#">Request Correction</a>
       </div>
 
       <div>
-        <h3 style="font-family:var(--font); font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin:0 0 8px;">🔐 Session & Security</h3>
+        <h3 style="font-family:var(--font); font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin:0 0 8px;">Session & Security</h3>
         <p style="font-size:0.88rem; color:var(--text-soft); margin:0 0 14px; line-height:1.6;">If you believe your account has been compromised, change your password immediately.</p>
-        <a class="btn btn-secondary btn-sm" href="{% url 'portal:settings' %}">⚙️ Go to Settings</a>
+        <a class="btn btn-secondary btn-sm" href="{% url 'portal:settings' %}">Go to Settings</a>
       </div>
     </div>
 
     <!-- Right: danger zone -->
     <div style="padding:28px;">
-      <h3 style="font-family:var(--font); font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#9f1239; margin:0 0 14px;">⚠️ Danger Zone</h3>
+      <h3 style="font-family:var(--font); font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:#9f1234; margin:0 0 14px;">Danger Zone</h3>
       <p style="font-size:0.88rem; color:var(--text-soft); margin:0 0 16px; line-height:1.6;">These actions are permanent in a live system. The buttons below are placeholders for this prototype.</p>
 
       <div style="padding:16px 18px; background:#fff1f2; border:1.5px solid #fecdd3; border-radius:14px; margin-bottom:20px;">
