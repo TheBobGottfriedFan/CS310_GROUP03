@@ -34,9 +34,12 @@ def require_permission(permission_name: str, *, forbidden_message: str = "Permis
         @login_required
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
+            if not request.session.get("user_id"):
+                return redirect("login")
             perms = request.session.get("permissions") or []
             if permission_name not in perms:
                 return HttpResponseForbidden(forbidden_message)
             return view_func(request, *args, **kwargs)
         return wrapper
     return decorator
+
