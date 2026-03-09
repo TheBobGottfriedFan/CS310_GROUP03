@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login, logout
@@ -33,12 +32,9 @@ def login_view(request):
     login(request, user)
     request.session["display_name"] = user.get_username()
     request.session["email"] = getattr(user, "email", "") or user.get_username()
-
-    # Store the SQL user id in session for password change
     sql_user_id = getattr(user, "sql_user_id", None)
     if sql_user_id:
         request.session["sql_user_id"] = sql_user_id
-
     return redirect("portal:dashboard")
 
 
