@@ -3,8 +3,9 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from .rbac import (
-    require_login, require_permission, require_any_permission, ACCESS_PATIENT_FILE, UPDATE_PATIENT_PROFILE, VIEW_LOGIN_HISTORY, VIEW_MESSAGES, REQUEST_APPOINTMENT, VIEW_PATIENT_PROFILE, MANAGE_SESSIONS, MANAGE_AVAILABILITY, MANAGE_APPOINTMENTS, CANCEL_APPOINTMENT, CREATE_MEDICAL_RECORD, UPDATE_MEDICAL_RECORD, SEND_MESSAGES, MANAGE_NOTIFICATIONS, VIEW_PRESCRIPTIONS, MANAGE_PRESCRIPTIONS, REQUEST_REFILL, APPROVE_REFILL, VIEW_INSURANCE, MANAGE_INSURANCE, MANAGE_USERS, MANAGE_ROLES_PERMISSIONS,
+    require_permission, require_any_permission, ACCESS_PATIENT_FILE, UPDATE_PATIENT_PROFILE, VIEW_LOGIN_HISTORY, VIEW_MESSAGES, REQUEST_APPOINTMENT, VIEW_PATIENT_PROFILE, MANAGE_SESSIONS, MANAGE_AVAILABILITY, MANAGE_APPOINTMENTS, CANCEL_APPOINTMENT, CREATE_MEDICAL_RECORD, UPDATE_MEDICAL_RECORD, SEND_MESSAGES, MANAGE_NOTIFICATIONS, VIEW_PRESCRIPTIONS, MANAGE_PRESCRIPTIONS, REQUEST_REFILL, APPROVE_REFILL, VIEW_INSURANCE, MANAGE_INSURANCE, MANAGE_USERS, MANAGE_ROLES_PERMISSIONS,
 )
 from .authentication_service import (
     create_sql_session,
@@ -62,16 +63,7 @@ def login_view(request):
     return redirect("dashboard")
 
 
-@require_login
-def dashboard_view(request):
-    context = {
-        "username": request.session.get("display_name") or request.session.get("email"),
-        "appointments": [], #once we implement appointments, we will use this.
-    }
-    return render(request, "portal/dashboard.html", context)
-
-
-@require_login
+@login_required
 def logout_view(request):
     token = request.session.session_key
     if token:
@@ -80,7 +72,7 @@ def logout_view(request):
     request.session.flush() 
     return redirect("login")
 
-@require_login
+@login_required
 def settings_view(request):
     context = {
         "username": request.session.get("display_name") or request.session.get("email"),
@@ -88,7 +80,7 @@ def settings_view(request):
     return render(request, "portal/settings.html", context)
 
 
-@require_login
+@login_required
 def privacy_view(request):
     context = {
         "username": request.session.get("display_name") or request.session.get("email"),
@@ -96,7 +88,7 @@ def privacy_view(request):
     return render(request, "portal/privacy.html", context)
 
 
-@require_login
+@login_required
 def messages_view(request):
     context = {
         "username": request.session.get("display_name") or request.session.get("email"),
@@ -105,7 +97,7 @@ def messages_view(request):
     return render(request, "portal/messages.html", context)
 
 
-@require_login
+@login_required
 def data_control_view(request):
     context = {
         "username": request.session.get("display_name") or request.session.get("email"),
@@ -113,14 +105,14 @@ def data_control_view(request):
     return render(request, "portal/data_control.html", context)
 
 
-@require_login
+@login_required
 def profile_view(request):
     context = {
         "username": request.session.get("display_name") or request.session.get("email"),
     }
     return render(request, "portal/profile.html", context)
 
-@require_login
+@login_required
 def dashboard_view(request):
     user_id = int(request.session["user_id"])
 
@@ -133,7 +125,7 @@ def dashboard_view(request):
     return render(request, "portal/dashboard.html", context)
     
 
-@require_login
+@login_required
 def notifications_view(request):
     user_id = int(request.session["user_id"])
     context = {
@@ -144,7 +136,7 @@ def notifications_view(request):
     return render(request, "portal/notifications.html", context)
 
 
-@require_login
+@login_required
 @require_http_methods(["POST"])
 def notification_mark_read(request, notif_id: int):
     user_id = int(request.session["user_id"])
@@ -152,7 +144,7 @@ def notification_mark_read(request, notif_id: int):
     return redirect("notifications")
     
 
-@require_login
+@login_required
 @require_http_methods(["POST"])
 def notifications_mark_all_read(request):
     user_id = int(request.session["user_id"])
@@ -161,57 +153,42 @@ def notifications_mark_all_read(request):
 
 
 # permission granting.
-@require_login
 @require_permission("view_login_history")
 def login_history_view(request):
  return JsonResponse({"ok": True, "permission": "view_login_history"})
 
 
-@require_login
+
 @require_permission("manage_users")
 def manage_users_view(request):
  return JsonResponse({"ok": True, "permission": "manage_users"})
 
-
-@require_login
 @require_permission("manage_roles_permissions")
 def manage_roles_permissions_view(request):
  return JsonResponse({"ok": True, "permission": "manage_roles_permissions"})
 
-
-@require_login
 @require_permission("manage_sessions")
 def manage_sessions_view(request):
  return JsonResponse({"ok": True, "permission": "manage_sessions"})
 
-
-@require_login
 @require_permission("manage_notifications")
 def manage_notifications_view(request):
  return JsonResponse({"ok": True, "permission": "manage_notifications"})
 
-
-@require_login
 @require_permission("view_messages")
 def view_messages_view(request):
  return JsonResponse({"ok": True, "permission": "view_messages"})
 
-
-@require_login
 @require_permission("send_messages")
 @require_http_methods(["POST"])
 def send_messages_view(request):
  return JsonResponse({"ok": True, "permission": "send_messages"})
 
-
-@require_login
 @require_permission("request_appointment")
 @require_http_methods(["POST"])
 def request_appointment_view(request):
  return JsonResponse({"ok": True, "permission": "request_appointment"})
 
-
-@require_login
 @require_permission("cancel_appointment")
 @require_http_methods(["POST"])
 def cancel_appointment_view(request, appointment_id: int):
@@ -221,61 +198,51 @@ def cancel_appointment_view(request, appointment_id: int):
   "appointment_id": appointment_id
  })
 
-
-@require_login
 @require_permission("manage_appointments")
 def manage_appointments_view(request):
  return JsonResponse({"ok": True, "permission": "manage_appointments"})
 
 
-@require_login
 @require_permission("manage_availability")
 @require_http_methods(["POST"])
 def manage_availability_view(request):
  return JsonResponse({"ok": True, "permission": "manage_availability"})
 
-
-@require_login
 @require_permission("view_patient_profile")
 def view_patient_profile_view(request, patient_id: int):
- role_id = int(request.session.get("role_id", 0))
- user_id = int(request.session["user_id"])
- if role_id == 1 and patient_id != user_id:
-  return JsonResponse(
-   {"ok": False, "error": "Patients can only view their own profile."},
-   status=403
-  )
-  return JsonResponse({
-   "ok": True,
-   "permission": "view_patient_profile",
-   "patient_id": patient_id
-  })
+    role_id = int(request.session.get("role_id", 0))
+    user_id = int(request.session["user_id"])
+    if role_id == 1 and patient_id != user_id:
+        return JsonResponse(
+            {"ok": False, "error": "Patients can only view their own profile."},
+            status=403
+        )
+    return JsonResponse({
+        "ok": True,
+        "permission": "view_patient_profile",
+        "patient_id": patient_id
+    })
 
-@require_login
 @require_permission("update_patient_profile")
 @require_http_methods(["POST"])
 def update_patient_profile_view(request):
  return JsonResponse({"ok": True, "permission": "update_patient_profile"})
 
-
-@require_login
 @require_permission("access_patient_file")
 def access_patient_file_view(request, patient_id: int):
- role_id = int(request.session.get("role_id", 0))
- user_id = int(request.session["user_id"])
- if role_id == 1 and patient_id != user_id:
-  return JsonResponse(
-   {"ok": False, "error": "Patients can only access their own file."},
-   status=403
-  )
-  return JsonResponse({
-   "ok": True,
-   "permission": "access_patient_file",
-   "patient_id": patient_id
-  })
+    role_id = int(request.session.get("role_id", 0))
+    user_id = int(request.session["user_id"])
+    if role_id == 1 and patient_id != user_id:
+        return JsonResponse(
+            {"ok": False, "error": "Patients can only access their own file."},
+            status=403
+        )
+    return JsonResponse({
+        "ok": True,
+        "permission": "access_patient_file",
+        "patient_id": patient_id
+    })
 
-
-@require_login
 @require_permission("create_medical_record")
 @require_http_methods(["POST"])
 def create_medical_record_view(request, patient_id: int):
@@ -285,8 +252,6 @@ def create_medical_record_view(request, patient_id: int):
   "patient_id": patient_id
  })
 
-
-@require_login
 @require_permission("update_medical_record")
 @require_http_methods(["POST"])
 def update_medical_record_view(request, record_id: int):
@@ -296,31 +261,26 @@ def update_medical_record_view(request, record_id: int):
   "record_id": record_id
  })
 
-@require_login
 @require_permission("view_prescriptions")
 def view_prescriptions_view(request, patient_id: int):
- role_id = int(request.session.get("role_id", 0))
- user_id = int(request.session["user_id"])
-  if role_id == 1 and patient_id != user_id:
-   return JsonResponse(
-    {"ok": False, "error": "Patients can only view their own prescriptions."},
-    status=403
-   )
-   return JsonResponse({
-    "ok": True,
-    "permission": "view_prescriptions",
-    "patient_id": patient_id
-   })
+    role_id = int(request.session.get("role_id", 0))
+    user_id = int(request.session["user_id"])
+    if role_id == 1 and patient_id != user_id:
+        return JsonResponse(
+            {"ok": False, "error": "Patients can only view their own prescriptions."},
+            status=403
+        )
+    return JsonResponse({
+        "ok": True,
+        "permission": "view_prescriptions",
+        "patient_id": patient_id
+    })
 
-
-@require_login
 @require_permission("manage_prescriptions")
 @require_http_methods(["POST"])
 def manage_prescriptions_view(request):
  return JsonResponse({"ok": True, "permission": "manage_prescriptions"})
 
-
-@require_login
 @require_permission("request_refill")
 @require_http_methods(["POST"])
 def request_refill_view(request, prescription_id: int):
@@ -330,8 +290,6 @@ def request_refill_view(request, prescription_id: int):
   "prescription_id": prescription_id
  })
 
-
-@require_login
 @require_permission("approve_refill")
 @require_http_methods(["POST"])
 def approve_refill_view(request, refill_id: int):
@@ -341,25 +299,21 @@ def approve_refill_view(request, refill_id: int):
   "refill_id": refill_id
  })
 
-
-@require_login
 @require_permission("view_insurance")
 def view_insurance_view(request, patient_id: int):
- role_id = int(request.session.get("role_id", 0))
- user_id = int(request.session["user_id"])
- if role_id == 1 and patient_id != user_id:
-  return JsonResponse(
-   {"ok": False, "error": "Patients can only view their own insurance."},
-   status=403
-  )
-  return JsonResponse({
-   "ok": True,
-   "permission": "view_insurance",
-   "patient_id": patient_id
-  })
+    role_id = int(request.session.get("role_id", 0))
+    user_id = int(request.session["user_id"])
+    if role_id == 1 and patient_id != user_id:
+        return JsonResponse(
+            {"ok": False, "error": "Patients can only view their own insurance."},
+            status=403
+        )
+    return JsonResponse({
+        "ok": True,
+        "permission": "view_insurance",
+        "patient_id": patient_id
+    })
 
-
-@require_login
 @require_permission("manage_insurance")
 @require_http_methods(["POST"])
 def manage_insurance_view(request, patient_id: int):
