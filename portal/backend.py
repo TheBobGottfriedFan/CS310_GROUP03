@@ -1,5 +1,5 @@
-import bcrypt
 from __future__ import annotations
+import bcrypt
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import User
 from .db import get_connection
@@ -85,11 +85,13 @@ class SQLBcryptBackend(BaseBackend):
         django_user.sql_user_id = sql_user_id
         django_user.sql_role_id = role_id
         return django_user
+
     def get_user(self, user_id):
         try:
             return User.objects.get(pk=user_id)
         except User.DoesNotExist:
             return None
+
     def _log_login_attempt(self, user_id: int, ip_address: str, user_agent: str, success: bool) -> None:
         conn = None
         try:
@@ -102,6 +104,7 @@ class SQLBcryptBackend(BaseBackend):
                 """,
                 (user_id, ip_address, (user_agent or "")[:255], int(success)),
             )
+            conn.commit()
         finally:
             if conn:
                 conn.close()

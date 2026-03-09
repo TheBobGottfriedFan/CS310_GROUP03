@@ -1,65 +1,116 @@
 {% extends "portal/base.html" %}
-
 {% block title %}My Profile | Patient Portal{% endblock %}
-
 {% block content %}
-<h1 class="page-title">My Profile</h1>
-<p class="muted" style="margin: 0 0 22px 0;">View your account and contact information.</p>
 
-<div class="card" style="margin-bottom: 14px;">
-    <!-- Avatar + name header -->
-    <div style="display:flex; align-items:center; gap:18px; padding-bottom:18px; border-bottom: 1px solid var(--sand-dark);">
-        <div style="width:64px; height:64px; border-radius:50%; background: linear-gradient(135deg, var(--teal-light), #d1fae5); border: 2px solid var(--teal-mid); display:flex; align-items:center; justify-content:center; font-size:28px; flex-shrink:0;">
-            👤
-        </div>
-        <div>
-            <h2 style="margin:0; font-size:1.25rem;">{{ username }}</h2>
-            <p class="muted" style="margin: 4px 0 8px 0; font-size:0.9rem;">{{ request.session.email }}</p>
-            <span class="badge badge-green">● Active Account</span>
-        </div>
+<div style="max-width:1100px; margin:0 auto; background:white; border-radius:24px; border:1.5px solid var(--border); box-shadow:0 4px 32px rgba(15,23,42,0.08), 0 0 0 1px rgba(13,148,136,0.07); overflow:hidden;">
+
+  <!-- Header -->
+  <div style="padding:22px 28px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg,var(--teal-50) 0%,white 60%);">
+    <div>
+      <h1 style="font-family:var(--font); font-size:1.5rem; font-weight:900; letter-spacing:-0.03em; color:var(--gray-900); margin:0 0 3px;">👤 My Profile</h1>
+      <p class="muted" style="margin:0; font-size:0.88rem;">Your account and contact information.</p>
     </div>
+    <a class="btn btn-sm" href="{% url 'portal:settings' %}">⚙️ Edit Settings</a>
+  </div>
+
+  <!-- Stats row -->
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid var(--border);">
+    <div style="padding:20px 24px; border-right:1px solid var(--border);">
+      <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); margin:0 0 6px; font-family:var(--font);">Username</p>
+      <p style="font-size:1.4rem; font-weight:900; color:var(--gray-900); font-family:var(--font); letter-spacing:-0.03em; line-height:1.2; margin:0; word-break:break-word;">{{ username }}</p>
+    </div>
+    <div style="padding:20px 24px; border-right:1px solid var(--border);">
+      <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); margin:0 0 6px; font-family:var(--font);">Role</p>
+      <p style="font-size:1.4rem; font-weight:900; color:var(--teal-600); font-family:var(--font); letter-spacing:-0.03em; line-height:1.2; margin:0;">
+        {% if request.session.role_id == 1 %}Patient
+        {% elif request.session.role_id == 2 %}Provider
+        {% elif request.session.role_id == 3 %}Admin
+        {% else %}Member{% endif %}
+      </p>
+    </div>
+    <div style="padding:20px 24px;">
+      <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); margin:0 0 6px; font-family:var(--font);">Status</p>
+      <p style="font-size:1.4rem; font-weight:900; color:var(--green); font-family:var(--font); letter-spacing:-0.03em; line-height:1.2; margin:0;">Active</p>
+    </div>
+  </div>
+
+  <!-- Two col body -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
 
     <!-- Account details -->
-    <h3 class="card-title" style="margin: 18px 0 12px 0;">Account Details</h3>
-    <div>
-        <div class="profile-field">
-            <span class="profile-field-label">Display Name</span>
-            <span class="profile-field-value">{{ username }}</span>
-        </div>
-        <div class="profile-field">
-            <span class="profile-field-label">Email</span>
-            <span class="profile-field-value">{{ request.session.email }}</span>
-        </div>
-        <div class="profile-field">
-            <span class="profile-field-label">Role</span>
-            <span class="profile-field-value">
-                {% if request.session.role_id == 1 %}Patient
-                {% elif request.session.role_id == 2 %}Provider
-                {% elif request.session.role_id == 3 %}Admin
-                {% else %}Role {{ request.session.role_id }}{% endif %}
+    <div style="padding:28px; border-right:1px solid var(--border);">
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:24px; padding-bottom:20px; border-bottom:1px solid var(--gray-100);">
+        <div style="width:68px; height:68px; border-radius:50%; background:linear-gradient(135deg,var(--teal-100),var(--teal-300)); border:3px solid var(--teal-200); display:flex; align-items:center; justify-content:center; font-size:28px; flex-shrink:0;">👤</div>
+        <div>
+          <h2 style="font-family:var(--font); font-size:1.2rem; font-weight:800; letter-spacing:-0.02em; color:var(--gray-900); margin:0 0 4px;">{{ username }}</h2>
+          <p style="font-size:0.85rem; color:var(--text-soft); margin:0 0 8px;">{{ request.session.email }}</p>
+          <div style="display:flex; gap:7px;">
+            <span class="badge badge-green">● Active</span>
+            <span class="badge badge-teal">
+              {% if request.session.role_id == 1 %}Patient
+              {% elif request.session.role_id == 2 %}Provider
+              {% elif request.session.role_id == 3 %}Admin
+              {% else %}Member{% endif %}
             </span>
+          </div>
         </div>
+      </div>
+
+      <h3 style="font-family:var(--font); font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin:0 0 12px;">Account Details</h3>
+      <div>
+        <div style="display:grid; grid-template-columns:130px 1fr; padding:11px 0; border-bottom:1px solid var(--gray-100);">
+          <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; font-family:var(--font);">Display Name</span>
+          <span style="font-family:var(--font); font-weight:600; color:var(--gray-800); font-size:0.92rem;">{{ username }}</span>
+        </div>
+        <div style="display:grid; grid-template-columns:130px 1fr; padding:11px 0; border-bottom:1px solid var(--gray-100);">
+          <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; font-family:var(--font);">Email</span>
+          <span style="font-family:var(--font); font-weight:600; color:var(--gray-800); font-size:0.92rem;">{{ request.session.email }}</span>
+        </div>
+        <div style="display:grid; grid-template-columns:130px 1fr; padding:11px 0; border-bottom:1px solid var(--gray-100);">
+          <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; font-family:var(--font);">Role</span>
+          <span style="font-family:var(--font); font-weight:600; color:var(--gray-800); font-size:0.92rem;">
+            {% if request.session.role_id == 1 %}Patient
+            {% elif request.session.role_id == 2 %}Provider
+            {% elif request.session.role_id == 3 %}Admin
+            {% else %}Member{% endif %}
+          </span>
+        </div>
+        <div style="display:grid; grid-template-columns:130px 1fr; padding:11px 0;">
+          <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; font-family:var(--font);">Since</span>
+          <span style="font-family:var(--font); font-weight:600; color:var(--gray-800); font-size:0.92rem;">2025</span>
+        </div>
+      </div>
     </div>
 
-    <hr>
+    <!-- Contact info -->
+    <div style="padding:28px;">
+      <h3 style="font-family:var(--font); font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin:0 0 16px;">Contact Info</h3>
+      <div>
+        <div style="display:grid; grid-template-columns:130px 1fr; padding:11px 0; border-bottom:1px solid var(--gray-100);">
+          <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; font-family:var(--font);">Phone</span>
+          <span style="font-family:var(--font); font-weight:600; color:var(--text-muted); font-size:0.92rem;">Not set</span>
+        </div>
+        <div style="display:grid; grid-template-columns:130px 1fr; padding:11px 0; border-bottom:1px solid var(--gray-100);">
+          <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; font-family:var(--font);">Address</span>
+          <span style="font-family:var(--font); font-weight:600; color:var(--text-muted); font-size:0.92rem;">Not set</span>
+        </div>
+        <div style="display:grid; grid-template-columns:130px 1fr; padding:11px 0;">
+          <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; font-family:var(--font);">Emergency</span>
+          <span style="font-family:var(--font); font-weight:600; color:var(--text-muted); font-size:0.92rem;">Not set</span>
+        </div>
+      </div>
 
-    <h3 class="card-title" style="margin-bottom:12px;">Contact Info</h3>
-    <div>
-        <div class="profile-field">
-            <span class="profile-field-label">Phone</span>
-            <span class="profile-field-value muted">Not set</span>
-        </div>
-        <div class="profile-field">
-            <span class="profile-field-label">Address</span>
-            <span class="profile-field-value muted">Not set</span>
-        </div>
+      <div style="margin-top:24px; padding:18px; background:var(--teal-50); border:1px solid var(--teal-200); border-radius:14px;">
+        <p style="font-family:var(--font); font-weight:700; font-size:0.88rem; color:var(--teal-800); margin:0 0 6px;">💡 Keep your info up to date</p>
+        <p style="font-size:0.83rem; color:var(--teal-700); margin:0 0 14px; line-height:1.5;">Adding your phone and address helps your care team reach you faster.</p>
+        <a class="btn btn-sm" href="{% url 'portal:settings' %}" style="font-size:0.82rem;">⚙️ Update in Settings</a>
+      </div>
+
+      <div style="margin-top:14px;">
+        <a class="btn btn-secondary btn-sm" href="{% url 'portal:data_control' %}">🗂️ Manage My Data</a>
+      </div>
     </div>
 
-    <hr>
-
-    <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a class="btn" href="{% url 'portal:settings' %}">⚙️ Edit Settings</a>
-        <a class="btn btn-secondary" href="{% url 'portal:data_control' %}">🗂️ Manage My Data</a>
-    </div>
+  </div>
 </div>
 {% endblock %}

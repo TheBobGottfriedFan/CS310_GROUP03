@@ -1,58 +1,88 @@
 {% extends "portal/base.html" %}
-
 {% block title %}Privacy | Patient Portal{% endblock %}
-
 {% block content %}
-<h1 class="page-title">Privacy</h1>
-<p class="muted" style="margin: 0 0 22px 0;">How your personal health information is handled and protected.</p>
 
-<div class="card">
-    <div class="info-box teal" style="margin-bottom: 20px;">
-        🔒 This portal is designed to protect your Personal Health Information (PHI) in accordance with best practices.
+<div style="max-width:1100px; margin:0 auto; background:white; border-radius:24px; border:1.5px solid var(--border); box-shadow:0 4px 32px rgba(15,23,42,0.08), 0 0 0 1px rgba(13,148,136,0.07); overflow:hidden;">
+
+  <!-- Header -->
+  <div style="padding:22px 28px; border-bottom:1px solid var(--border); background:linear-gradient(135deg,var(--teal-50) 0%,white 60%);">
+    <h1 style="font-family:var(--font); font-size:1.5rem; font-weight:900; letter-spacing:-0.03em; color:var(--gray-900); margin:0 0 3px;">🔒 Privacy</h1>
+    <p class="muted" style="margin:0; font-size:0.88rem;">How your personal health information is handled and protected.</p>
+  </div>
+
+  <!-- Stats row -->
+  <div style="display:grid; grid-template-columns:repeat(4,1fr); border-bottom:1px solid var(--border);">
+    <div style="padding:18px 22px; border-right:1px solid var(--border);">
+      <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); margin:0 0 5px; font-family:var(--font);">Encryption</p>
+      <p style="font-size:1.2rem; font-weight:900; color:var(--teal-600); font-family:var(--font); letter-spacing:-0.02em; margin:0;">bcrypt</p>
+    </div>
+    <div style="padding:18px 22px; border-right:1px solid var(--border);">
+      <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); margin:0 0 5px; font-family:var(--font);">Access Control</p>
+      <p style="font-size:1.2rem; font-weight:900; color:var(--teal-600); font-family:var(--font); letter-spacing:-0.02em; margin:0;">RBAC</p>
+    </div>
+    <div style="padding:18px 22px; border-right:1px solid var(--border);">
+      <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); margin:0 0 5px; font-family:var(--font);">CSRF</p>
+      <p style="font-size:1.2rem; font-weight:900; color:var(--green); font-family:var(--font); letter-spacing:-0.02em; margin:0;">Active</p>
+    </div>
+    <div style="padding:18px 22px;">
+      <p style="font-size:0.68rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); margin:0 0 5px; font-family:var(--font);">Sessions</p>
+      <p style="font-size:1.2rem; font-weight:900; color:var(--green); font-family:var(--font); letter-spacing:-0.02em; margin:0;">Secured</p>
+    </div>
+  </div>
+
+  <!-- Body: 2 col -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+
+    <div style="padding:28px; border-right:1px solid var(--border);">
+      <h3 style="font-family:var(--font); font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin:0 0 14px;">📦 Data We Store</h3>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        {% for item in "1234" %}
+        {% endfor %}
+        <div style="display:flex; align-items:center; gap:10px; padding:11px 14px; background:var(--gray-50); border:1px solid var(--border); border-radius:10px;">
+          <span style="color:var(--teal-500); font-size:1rem;">✓</span>
+          <span style="font-size:0.88rem; color:var(--gray-700); font-weight:500;">Account info (username, email, role)</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; padding:11px 14px; background:var(--gray-50); border:1px solid var(--border); border-radius:10px;">
+          <span style="color:var(--teal-500); font-size:1rem;">✓</span>
+          <span style="font-size:0.88rem; color:var(--gray-700); font-weight:500;">Login history (timestamps, IP, device)</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; padding:11px 14px; background:var(--gray-50); border:1px solid var(--border); border-radius:10px;">
+          <span style="color:var(--teal-500); font-size:1rem;">✓</span>
+          <span style="font-size:0.88rem; color:var(--gray-700); font-weight:500;">Secure messages with care team</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; padding:11px 14px; background:var(--gray-50); border:1px solid var(--border); border-radius:10px;">
+          <span style="color:var(--teal-500); font-size:1rem;">✓</span>
+          <span style="font-size:0.88rem; color:var(--gray-700); font-weight:500;">Appointment records (when implemented)</span>
+        </div>
+      </div>
     </div>
 
-    <h3 class="card-title">📦 Data We Store</h3>
-    <ul style="margin: 12px 0 0 20px; display:flex; flex-direction:column; gap:6px; color: var(--ink-mid);">
-        <li>Account information (username, email, role)</li>
-        <li>Login history (timestamps, IP address, device info)</li>
-        <li>Secure messages with your care team</li>
-        <li>Appointment records (when implemented)</li>
-    </ul>
-
-    <hr>
-
-    <h3 class="card-title">🛡️ Security Controls</h3>
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:12px;">
-        <div style="padding:12px 14px; background:var(--sand); border-radius:var(--radius-sm); border:1px solid var(--border);">
-            <p style="margin:0; font-weight:700; font-size:0.9rem;">🔑 Password Hashing</p>
-            <p class="muted" style="margin:4px 0 0 0; font-size:0.85rem;">bcrypt with salt rounds</p>
+    <div style="padding:28px;">
+      <h3 style="font-family:var(--font); font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin:0 0 14px;">🛡️ Security Controls</h3>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+        <div style="padding:14px; background:var(--teal-50); border:1px solid var(--teal-200); border-radius:12px;">
+          <p style="font-family:var(--font); font-weight:700; font-size:0.88rem; color:var(--teal-900); margin:0 0 3px;">🔑 Passwords</p>
+          <p style="font-size:0.8rem; color:var(--teal-700); margin:0;">bcrypt hashing</p>
         </div>
-        <div style="padding:12px 14px; background:var(--sand); border-radius:var(--radius-sm); border:1px solid var(--border);">
-            <p style="margin:0; font-weight:700; font-size:0.9rem;">👥 Role-Based Access</p>
-            <p class="muted" style="margin:4px 0 0 0; font-size:0.85rem;">RBAC — patients, providers, admins</p>
+        <div style="padding:14px; background:var(--teal-50); border:1px solid var(--teal-200); border-radius:12px;">
+          <p style="font-family:var(--font); font-weight:700; font-size:0.88rem; color:var(--teal-900); margin:0 0 3px;">👥 Access</p>
+          <p style="font-size:0.8rem; color:var(--teal-700); margin:0;">Role-based (RBAC)</p>
         </div>
-        <div style="padding:12px 14px; background:var(--sand); border-radius:var(--radius-sm); border:1px solid var(--border);">
-            <p style="margin:0; font-weight:700; font-size:0.9rem;">⏱️ Session Expiration</p>
-            <p class="muted" style="margin:4px 0 0 0; font-size:0.85rem;">Auto logout + session invalidation</p>
+        <div style="padding:14px; background:var(--teal-50); border:1px solid var(--teal-200); border-radius:12px;">
+          <p style="font-family:var(--font); font-weight:700; font-size:0.88rem; color:var(--teal-900); margin:0 0 3px;">⏱️ Sessions</p>
+          <p style="font-size:0.8rem; color:var(--teal-700); margin:0;">Auto-expiry + logout</p>
         </div>
-        <div style="padding:12px 14px; background:var(--sand); border-radius:var(--radius-sm); border:1px solid var(--border);">
-            <p style="margin:0; font-weight:700; font-size:0.9rem;">🛡️ CSRF Protection</p>
-            <p class="muted" style="margin:4px 0 0 0; font-size:0.85rem;">All forms include CSRF tokens</p>
+        <div style="padding:14px; background:var(--teal-50); border:1px solid var(--teal-200); border-radius:12px;">
+          <p style="font-family:var(--font); font-weight:700; font-size:0.88rem; color:var(--teal-900); margin:0 0 3px;">🛡️ CSRF</p>
+          <p style="font-size:0.8rem; color:var(--teal-700); margin:0;">All forms protected</p>
         </div>
+      </div>
+      <a class="btn btn-sm" href="{% url 'portal:data_control' %}">🗂️ Go to Data Control</a>
+      <div style="margin-top:16px; padding:12px 16px; background:var(--amber-light); border:1px solid #fde68a; border-radius:10px; font-size:0.84rem; color:#92400e; line-height:1.5;">
+        ⚠️ Production systems include full HIPAA compliance, audit logging, and encryption at rest.
+      </div>
     </div>
 
-    <hr>
-
-    <h3 class="card-title">✋ Your Rights & Control</h3>
-    <p class="muted" style="margin: 8px 0 14px 0; font-size:0.93rem;">
-        You have the right to view, export, correct, and request deletion of your data at any time.
-    </p>
-    <a class="btn" href="{% url 'portal:data_control' %}">🗂️ Go to Data Control</a>
-
-    <hr>
-
-    <div class="info-box amber">
-        ⚠️ <strong>Prototype Note:</strong> A production system would include full HIPAA compliance language, audit logging, encryption at rest, and a signed Business Associate Agreement (BAA).
-    </div>
+  </div>
 </div>
 {% endblock %}
