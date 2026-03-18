@@ -2,7 +2,6 @@ from __future__ import annotations
 from typing import List, Dict, Any, Optional
 from .db import get_connection
 
-
 def get_unread_count(user_id: int) -> int:
     conn = get_connection()
     try:
@@ -15,7 +14,6 @@ def get_unread_count(user_id: int) -> int:
         return int(count)
     finally:
         conn.close()
-
 
 def list_notifications(user_id: int, limit: Optional[int] = None) -> List[Dict[str, Any]]:
     conn = get_connection()
@@ -36,7 +34,6 @@ def list_notifications(user_id: int, limit: Optional[int] = None) -> List[Dict[s
     finally:
         conn.close()
 
-
 def mark_read(user_id: int, notif_id: int) -> None:
     conn = get_connection()
     try:
@@ -49,6 +46,7 @@ def mark_read(user_id: int, notif_id: int) -> None:
             """,
             (notif_id, user_id),
         )
+        conn.commit()
     finally:
         conn.close()
 
@@ -65,5 +63,6 @@ def mark_all_read(user_id: int) -> None:
             """,
             (user_id,),
         )
+        conn.commit()
     finally:
         conn.close()
