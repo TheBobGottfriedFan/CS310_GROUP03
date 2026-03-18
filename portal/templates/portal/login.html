@@ -1,22 +1,265 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Patient Login</title>
-    <link rel="stylesheet" href="{% static 'portal/styles.css' %}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In | Patient Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'portal/styles.css' %}">
+  <style>
+    .video-bg { position:fixed; inset:0; z-index:0; overflow:hidden; }
+    .video-bg video { width:100%; height:100%; object-fit:cover; object-position:center; }
+    .video-overlay {
+      position:fixed; inset:0; z-index:1;
+      background: linear-gradient(105deg,
+        rgba(5,20,18,0.90) 0%,
+        rgba(8,40,36,0.82) 45%,
+        rgba(5,20,18,0.60) 100%);
+      pointer-events:none;
+    }
+
+    body.auth-page {
+      min-height:100vh; margin:0; padding:0;
+      display:flex; align-items:stretch;
+      position:relative; z-index:2;
+      background:transparent;
+      font-family:'Plus Jakarta Sans', sans-serif;
+    }
+
+    .login-left {
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      padding:60px 80px;
+      position:relative; z-index:3;
+    }
+
+    .login-logo {
+      position:absolute;
+      top:36px; left:40px;
+      display:flex; align-items:center; gap:12px;
+    }
+    .login-logo-icon {
+      width:40px; height:40px; border-radius:12px;
+      background:rgba(255,255,255,0.12);
+      border:1px solid rgba(255,255,255,0.2);
+      display:flex; align-items:center; justify-content:center;
+      font-size:19px; backdrop-filter:blur(8px);
+    }
+    .login-logo-text {
+      font-size:1rem; font-weight:700;
+      color:rgba(255,255,255,0.85);
+      letter-spacing:-0.01em;
+    }
+
+    .login-headline h1 {
+      font-size: clamp(4rem, 8vw, 7rem);
+      font-weight:900;
+      color:white;
+      line-height:1.0;
+      letter-spacing:-0.05em;
+      margin:0 0 28px 0;
+    }
+    .login-headline h1 span { color:#2dd4bf; }
+
+    .login-headline p {
+      font-family:'DM Sans', sans-serif;
+      font-size:1.15rem;
+      color:rgba(255,255,255,0.55);
+      max-width:420px;
+      line-height:1.75;
+      margin:0 auto 44px;
+    }
+
+    .login-stats {
+      display:flex;
+      gap:48px;
+      justify-content:center;
+    }
+    .login-stat { text-align:center; }
+    .login-stat-num {
+      font-size:2rem; font-weight:900;
+      color:white; letter-spacing:-0.04em;
+      line-height:1;
+    }
+    .login-stat-label {
+      font-size:0.72rem; color:rgba(255,255,255,0.4);
+      font-weight:600; margin-top:5px;
+      text-transform:uppercase; letter-spacing:0.08em;
+    }
+
+    .login-left-footer {
+      position:absolute;
+      bottom:24px; left:0; right:0;
+      text-align:center;
+      font-size:0.78rem;
+      color:rgba(255,255,255,0.25);
+      letter-spacing:0.04em;
+    }
+    .login-right {
+      width:480px; flex-shrink:0;
+      background:rgba(255,255,255,0.97);
+      backdrop-filter:blur(20px);
+      display:flex; flex-direction:column;
+      justify-content:center;
+      padding:64px 56px;
+      position:relative; z-index:3;
+      box-shadow:-24px 0 70px rgba(0,0,0,0.3);
+    }
+
+    .login-right-header { margin-bottom:34px; }
+    .login-right-header h2 {
+      font-size:2rem; font-weight:900;
+      color:#0f172a; letter-spacing:-0.04em;
+      margin:0 0 8px 0; line-height:1.1;
+    }
+    .login-right-header p {
+      font-family:'DM Sans',sans-serif;
+      font-size:0.93rem; color:#64748b;
+    }
+
+    .field-label {
+      display:block;
+      font-size:0.73rem; font-weight:700;
+      letter-spacing:0.08em; text-transform:uppercase;
+      color:#64748b; margin:22px 0 7px;
+    }
+    input[type="text"], input[type="password"], input[type="email"] {
+      width:100%; padding:15px 16px;
+      border-radius:10px;
+      border:1.5px solid #e2e8f0;
+      background:#f8fafc;
+      font-family:'Plus Jakarta Sans',sans-serif;
+      font-size:0.96rem; color:#0f172a;
+      outline:none;
+      transition:border-color 0.18s, box-shadow 0.18s, background 0.18s;
+    }
+    input:focus {
+      border-color:#14b8a6;
+      background:white;
+      box-shadow:0 0 0 3.5px rgba(20,184,166,0.15);
+    }
+
+    .login-submit {
+      width:100%; margin-top:26px;
+      padding:16px;
+      background:linear-gradient(135deg,#14b8a6,#0f766e);
+      color:white; border:none; border-radius:10px;
+      font-family:'Plus Jakarta Sans',sans-serif;
+      font-size:1rem; font-weight:800;
+      cursor:pointer; letter-spacing:-0.01em;
+      box-shadow:0 4px 20px rgba(13,148,136,0.38);
+      transition:all 0.2s;
+    }
+    .login-submit:hover {
+      transform:translateY(-2px);
+      box-shadow:0 8px 28px rgba(13,148,136,0.45);
+    }
+
+    .alert {
+      background:#fff1f2; color:#9f1239;
+      border:1px solid #fecdd3;
+      padding:12px 14px; border-radius:10px;
+      margin-bottom:16px; font-size:0.9rem;
+      display:flex; align-items:center; gap:8px;
+    }
+
+    .login-right-footer {
+      margin-top:30px; padding-top:22px;
+      border-top:1px solid #f1f5f9;
+      display:flex; align-items:center; gap:10px;
+    }
+    .login-right-footer span {
+      font-size:0.81rem; color:#94a3b8; line-height:1.5;
+    }
+    .lock-icon {
+      width:30px; height:30px; border-radius:8px;
+      background:#f0fdfa; border:1px solid #99f6e4;
+      display:flex; align-items:center; justify-content:center;
+      font-size:14px; flex-shrink:0;
+    }
+
+    @media (max-width:768px) {
+      body.auth-page { flex-direction:column; }
+      .login-left { padding:80px 28px 48px; min-height:50vh; }
+      .login-right { width:100%; padding:40px 28px; }
+    }
+  </style>
 </head>
-<body>
-<div class="login-box">
-    <h2>Patient Portal</h2>
+<body class="auth-page">
+
+  <div class="video-bg">
+    <video autoplay muted loop playsinline>
+      <source src="{% static 'portal/hospital.mp4' %}" type="video/mp4">
+    </video>
+  </div>
+  <div class="video-overlay"></div>
+  <div class="login-left">
+    <div class="login-logo">
+      <div class="login-logo-icon">🩺</div>
+      <span class="login-logo-text">Patient Portal</span>
+    </div>
+
+    <div class="login-headline">
+      <h1>Welcome<br>Back<span>.</span></h1>
+      <p>Access your health records, messages, and appointments — all in one secure place.</p>
+      <div class="login-stats">
+        <div class="login-stat">
+          <div class="login-stat-num">100%</div>
+          <div class="login-stat-label">Secure</div>
+        </div>
+        <div class="login-stat">
+          <div class="login-stat-num">24/7</div>
+          <div class="login-stat-label">Available</div>
+        </div>
+        <div class="login-stat">
+          <div class="login-stat-num">HIPAA</div>
+          <div class="login-stat-label">Compliant</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="login-left-footer">
+      Secure Patient Portal &nbsp;·&nbsp; Protected Health Information
+    </div>
+  </div>
+
+  <div class="login-right">
+    <div class="login-right-header">
+      <h2>Sign in to<br>your account</h2>
+      <p>Enter your credentials to access the portal.</p>
+    </div>
+
     {% if error %}
-        <p style="color: red;">{{ error }}</p>
+      <div class="alert">⚠️ {{ error }}</div>
     {% endif %}
-    <form method="POST">
-        {% csrf_token %}
-        <input type="text" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Login</button>
+
+    <form method="POST" autocomplete="on">
+      {% csrf_token %}
+      <label class="field-label" for="username">Username or Email</label>
+      <input id="username" type="text" name="email"
+        placeholder="Enter your username or email"
+        autocomplete="username" required />
+
+      <label class="field-label" for="password">Password</label>
+      <input id="password" type="password" name="password"
+        placeholder="Enter your password"
+        autocomplete="current-password" required />
+
+      <button class="login-submit" type="submit">Sign In →</button>
     </form>
-</div>
+
+    <div class="login-right-footer">
+      <div class="lock-icon">🔒</div>
+      <span>Your health information is protected with end-to-end encryption.</span>
+    </div>
+  </div>
+
 </body>
 </html>
