@@ -1,7 +1,72 @@
-<h2>Messages</h2>
+{% extends "portal/base.html" %}
+{% block title %}Messages | Patient Portal{% endblock %}
+{% block content %}
 
-<p>Hello {{ username }}</p>
+<div style="max-width:1100px; margin:0 auto; background:white; border-radius:24px; border:1.5px solid var(--border); box-shadow:0 4px 32px rgba(15,23,42,0.08), 0 0 0 1px rgba(13,148,136,0.07); overflow:hidden;">
 
-<p>No messages yet.</p>
+  <!-- Header bar -->
+  <div style="padding:22px 28px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg,var(--teal-50) 0%,white 60%);">
+    <div>
+      <h1 style="font-family:var(--font); font-size:1.5rem; font-weight:900; letter-spacing:-0.03em; color:var(--gray-900); margin:0 0 3px;">💬 Messages</h1>
+      <p class="muted" style="margin:0; font-size:0.88rem;">Safe and Secured messages between you and your healthcare team.</p>
+    </div>
+    <a class="btn btn-sm" href="#">+ New Message</a>
+  </div>
 
-<a href="/dashboard/">Back</a>
+  <!-- Stats row -->
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid var(--border);">
+    <div style="padding:20px 24px; border-right:1px solid var(--border);">
+      <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); margin:0 0 6px; font-family:var(--font);">Total Messages</p>
+      <p style="font-size:2.4rem; font-weight:900; color:var(--gray-900); font-family:var(--font); letter-spacing:-0.04em; line-height:1; margin:0;">{% if portal_messages %}{{ portal_messages|length }}{% else %}2{% endif %}</p>
+    </div>
+    <div style="padding:20px 24px; border-right:1px solid var(--border);">
+      <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); margin:0 0 6px; font-family:var(--font);">Unread</p>
+      <p style="font-size:2.4rem; font-weight:900; color:var(--teal-600); font-family:var(--font); letter-spacing:-0.04em; line-height:1; margin:0;">{% if portal_messages %}{{ portal_messages|length }}{% else %}2{% endif %}</p>
+    </div>
+    <div style="padding:20px 24px;">
+      <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); margin:0 0 6px; font-family:var(--font);">Care Team</p>
+      <p style="font-size:2.4rem; font-weight:900; color:var(--gray-900); font-family:var(--font); letter-spacing:-0.04em; line-height:1; margin:0;">Active</p>
+    </div>
+  </div>
+
+  <!-- Inbox -->
+  <div style="padding:24px;">
+    {% if portal_messages and portal_messages|length > 0 %}
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        {% for m in portal_messages %}
+          <div style="display:flex; align-items:flex-start; gap:16px; padding:16px 18px; border:1.5px solid var(--border); border-radius:14px; background:white; cursor:pointer; transition:all 0.15s; border-left:4px solid var(--teal-500);">
+            <div style="width:42px; height:42px; border-radius:12px; background:var(--teal-50); border:1px solid var(--teal-200); display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;">💬</div>
+            <div style="flex:1; min-width:0;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:4px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span class="badge badge-teal" style="font-size:0.7rem;">New</span>
+                  <p style="font-family:var(--font); font-weight:800; font-size:0.95rem; color:var(--gray-900); margin:0;">{{ m.subject }}</p>
+                </div>
+                <span style="font-size:0.8rem; color:var(--text-muted); white-space:nowrap; font-family:var(--font); font-weight:600;">{{ m.date }}</span>
+              </div>
+              <p style="font-size:0.82rem; color:var(--text-muted); margin:0 0 6px; font-weight:600;">From: <strong style="color:var(--gray-700);">{{ m.from }}</strong></p>
+              <p style="font-size:0.9rem; color:var(--text-soft); margin:0; line-height:1.5;">{{ m.preview }}</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="text-align:center; padding:56px 20px; color:var(--text-soft);">
+        <div style="font-size:3.5rem; margin-bottom:14px;">✉️</div>
+        <p style="font-family:var(--font); font-weight:800; font-size:1.05rem; color:var(--gray-700); margin:0 0 8px;">Your inbox is empty</p>
+        <p style="font-size:0.9rem; margin:0 0 24px;">Messages from your care team will appear here.</p>
+        <div style="max-width:400px; margin:0 auto; padding:16px 20px; background:var(--teal-50); border:1px solid var(--teal-200); border-radius:14px; text-align:left;">
+          <p style="font-family:var(--font); font-weight:700; font-size:0.88rem; color:var(--teal-800); margin:0 0 10px;">You can message your healthcare to:</p>
+          <ul style="margin:0; padding-left:18px; display:flex; flex-direction:column; gap:5px; color:var(--teal-700); font-size:0.86rem;">
+            <li>Ask about symptoms or concerns</li>
+            <li>Request prescription refills</li>
+            <li>Get lab result updates</li>
+            <li>Receive appointment reminders</li>
+          </ul>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
