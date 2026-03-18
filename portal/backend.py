@@ -1,9 +1,9 @@
-import bcrypt
 from __future__ import annotations
+import bcrypt
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import User
 from .db import get_connection
-
+from .authentication_service import record_login_history
 
 class SQLBcryptBackend(BaseBackend):
     def authenticate(self, request, username=None, password=None, email=None, **kwargs):
@@ -28,7 +28,7 @@ class SQLBcryptBackend(BaseBackend):
                 """
                 SELECT id, role_id, email, password_hash, first_name, last_name, is_active
                 FROM users
-                WHERE email = %s
+                WHERE LOWER(email) = %s
                 LIMIT 1
                 """,
                 (email_val,),
@@ -43,17 +43,32 @@ class SQLBcryptBackend(BaseBackend):
         role_id = int(row["role_id"])
         is_active = bool(row.get("is_active", True))
         if not is_active:
-            self._log_login_attempt(sql_user_id, ip_address, user_agent, success=False)
+            record_login_history(
+                user_id=sql_user_id,
+                ip_address=ip_address,
+                user_agent=(user_agent or "")[:255],
+                success=False,
+            )
             return None
         stored_hash = row.get("password_hash")
         if not stored_hash or not isinstance(stored_hash, str) or not stored_hash.startswith("$2"):
-            self._log_login_attempt(sql_user_id, ip_address, user_agent, success=False)
+            record_login_history(
+                user_id=sql_user_id,
+                ip_address=ip_address,
+                user_agent=(user_agent or "")[:255],
+                success=False,
+            )
             return None
         try:
             ok = bcrypt.checkpw(password.encode("utf-8"), stored_hash.encode("utf-8"))
         except Exception:
             ok = False
-        self._log_login_attempt(sql_user_id, ip_address, user_agent, success=ok)
+        record_login_history(
+            user_id=sql_user_id,
+            ip_address=ip_address,
+            user_agent=(user_agent or "")[:255],
+            success=ok,
+        )
         if not ok:
             return None
         django_user, _ = User.objects.get_or_create(
@@ -65,6 +80,7 @@ class SQLBcryptBackend(BaseBackend):
                 "is_active": True,
             },
         )
+
         fn = row.get("first_name") or ""
         ln = row.get("last_name") or ""
         updated = False
@@ -85,23 +101,9 @@ class SQLBcryptBackend(BaseBackend):
         django_user.sql_user_id = sql_user_id
         django_user.sql_role_id = role_id
         return django_user
+
     def get_user(self, user_id):
         try:
             return User.objects.get(pk=user_id)
         except User.DoesNotExist:
             return None
-    def _log_login_attempt(self, user_id: int, ip_address: str, user_agent: str, success: bool) -> None:
-        conn = None
-        try:
-            conn = get_connection()
-            cur = conn.cursor()
-            cur.execute(
-                """
-                INSERT INTO login_history (user_id, ip_address, user_agent, success)
-                VALUES (%s, %s, %s, %s)
-                """,
-                (user_id, ip_address, (user_agent or "")[:255], int(success)),
-            )
-        finally:
-            if conn:
-                conn.close()
