@@ -1,13 +1,131 @@
-<h2>Settings</h2>
+{% extends "portal/base.html" %}
+{% block title %}Settings | Patient Portal{% endblock %}
+{% block content %}
 
-<p>Welcome {{ username }}</p>
+<div style="max-width:1100px; margin:0 auto; background:white; border-radius:24px; border:1.5px solid var(--border); box-shadow:0 4px 32px rgba(15,23,42,0.08), 0 0 0 1px rgba(13,148,136,0.07); overflow:hidden;">
 
-<ul>
-  <li><a href="/dashboard/">Dashboard</a></li>
-  <li><a href="/privacy/">Privacy</a></li>
-  <li><a href="/messages/">Messages</a></li>
-  <li><a href="/profile/">Profile</a></li>
-  <li><a href="/logout/">Logout</a></li>
-</ul>
+  <!-- Header -->
+  <div style="padding:22px 28px; border-bottom:1px solid var(--border); background:linear-gradient(135deg,var(--teal-50) 0%,white 60%);">
+    <h1 style="font-family:var(--font); font-size:1.5rem; font-weight:900; letter-spacing:-0.03em; color:var(--gray-900); margin:0 0 3px;">⚙️ Account Settings</h1>
+    <p class="muted" style="margin:0; font-size:0.88rem;">Manage your profile, security, and preferences.</p>
+  </div>
 
-<p>Settings page placeholder</p>
+  <!-- Stats row -->
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid var(--border);">
+    <div style="padding:20px 24px; border-right:1px solid var(--border);">
+      <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); margin:0 0 6px; font-family:var(--font);">Account</p>
+      <p style="font-size:1.3rem; font-weight:900; color:var(--gray-900); font-family:var(--font); letter-spacing:-0.02em; margin:0; word-break:break-word;">{{ username }}</p>
+    </div>
+    <div style="padding:20px 24px; border-right:1px solid var(--border);">
+      <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); margin:0 0 6px; font-family:var(--font);">2FA</p>
+      <p style="font-size:1.3rem; font-weight:900; color:var(--amber); font-family:var(--font); letter-spacing:-0.02em; margin:0;">Not Set</p>
+    </div>
+    <div style="padding:20px 24px;">
+      <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); margin:0 0 6px; font-family:var(--font);">Security</p>
+      <p style="font-size:1.3rem; font-weight:900; color:var(--green); font-family:var(--font); letter-spacing:-0.02em; margin:0;">Strong</p>
+    </div>
+  </div>
+
+  <!-- Two col body -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+
+    <!-- LEFT: Profile info + Change Password form -->
+    <div style="padding:28px; border-right:1px solid var(--border);">
+
+      <h3 style="font-family:var(--font); font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin:0 0 14px;">Profile Information</h3>
+      <div style="margin-bottom:28px;">
+        <div style="display:grid; grid-template-columns:100px 1fr; padding:11px 0; border-bottom:1px solid var(--gray-100);">
+          <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; font-family:var(--font);">Name</span>
+          <span style="font-family:var(--font); font-weight:600; color:var(--gray-800);">{{ username }}</span>
+        </div>
+        <div style="display:grid; grid-template-columns:100px 1fr; padding:11px 0;">
+          <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; font-family:var(--font);">Email</span>
+          <span style="font-family:var(--font); font-weight:600; color:var(--gray-800); font-size:0.9rem; word-break:break-word;">{{ request.session.email }}</span>
+        </div>
+      </div>
+
+      <!-- Change Password Form -->
+      <h3 style="font-family:var(--font); font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin:0 0 14px;">🔐 Change Password</h3>
+
+      {% if pw_error %}
+        <div style="background:#fff1f2; color:#9f1239; border:1px solid #fecdd3; padding:11px 14px; border-radius:10px; margin-bottom:14px; font-size:0.9rem; display:flex; align-items:center; gap:8px;">
+          ⚠️ {{ pw_error }}
+        </div>
+      {% endif %}
+
+      {% if pw_success %}
+        <div style="background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; padding:11px 14px; border-radius:10px; margin-bottom:14px; font-size:0.9rem; display:flex; align-items:center; gap:8px;">
+          ✅ {{ pw_success }}
+        </div>
+      {% endif %}
+
+      <form method="POST" autocomplete="off">
+        {% csrf_token %}
+
+        <label style="display:block; font-size:0.73rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--gray-500); margin:0 0 6px;" for="current_password">Current Password</label>
+        <input id="current_password" type="password" name="current_password"
+          placeholder="Enter your current password"
+          style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--border); background:var(--gray-50); font-family:var(--font); font-size:0.93rem; color:var(--text); outline:none; margin-bottom:14px;"
+        />
+
+        <label style="display:block; font-size:0.73rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--gray-500); margin:0 0 6px;" for="new_password">New Password</label>
+        <input id="new_password" type="password" name="new_password"
+          placeholder="At least 8 characters"
+          style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--border); background:var(--gray-50); font-family:var(--font); font-size:0.93rem; color:var(--text); outline:none; margin-bottom:14px;"
+        />
+
+        <label style="display:block; font-size:0.73rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--gray-500); margin:0 0 6px;" for="confirm_password">Confirm New Password</label>
+        <input id="confirm_password" type="password" name="confirm_password"
+          placeholder="Re-enter new password"
+          style="width:100%; padding:12px 14px; border-radius:10px; border:1.5px solid var(--border); background:var(--gray-50); font-family:var(--font); font-size:0.93rem; color:var(--text); outline:none; margin-bottom:18px;"
+        />
+
+        <button type="submit" style="width:100%; padding:13px; background:linear-gradient(135deg,var(--teal-500),var(--teal-700)); color:white; border:none; border-radius:10px; font-family:var(--font); font-size:0.95rem; font-weight:700; cursor:pointer; box-shadow:0 4px 14px rgba(13,148,136,0.28);">
+          🔑 Update Password
+        </button>
+      </form>
+    </div>
+
+    <!-- RIGHT: Notifications -->
+    <div style="padding:28px;">
+      <h3 style="font-family:var(--font); font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin:0 0 6px;">🔔 Notifications</h3>
+      <p style="font-size:0.88rem; color:var(--text-soft); margin:0 0 20px; line-height:1.6;">Choose how you'd like to be notified.</p>
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <label style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--gray-50); border:1px solid var(--border); border-radius:10px; cursor:pointer;">
+          <div>
+            <p style="font-family:var(--font); font-weight:700; font-size:0.9rem; color:var(--gray-800); margin:0 0 2px;">New message emails</p>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">Get notified when your care team messages you</p>
+          </div>
+          <input type="checkbox" checked style="width:18px; height:18px; accent-color:var(--teal-600); flex-shrink:0; margin-left:14px;" />
+        </label>
+        <label style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--gray-50); border:1px solid var(--border); border-radius:10px; cursor:pointer;">
+          <div>
+            <p style="font-family:var(--font); font-weight:700; font-size:0.9rem; color:var(--gray-800); margin:0 0 2px;">Appointment reminders</p>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">24 hours before your scheduled visit</p>
+          </div>
+          <input type="checkbox" checked style="width:18px; height:18px; accent-color:var(--teal-600); flex-shrink:0; margin-left:14px;" />
+        </label>
+        <label style="display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:var(--gray-50); border:1px solid var(--border); border-radius:10px; cursor:pointer;">
+          <div>
+            <p style="font-family:var(--font); font-weight:700; font-size:0.9rem; color:var(--gray-800); margin:0 0 2px;">SMS reminders</p>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">Requires a phone number on your profile</p>
+          </div>
+          <input type="checkbox" style="width:18px; height:18px; accent-color:var(--teal-600); flex-shrink:0; margin-left:14px;" />
+        </label>
+      </div>
+
+      <div style="margin-top:16px; padding:12px 16px; background:var(--amber-light); border:1px solid #fde68a; border-radius:10px; font-size:0.85rem; color:#92400e;">
+        ⚠️ Notification preferences are display-only in this prototype.
+      </div>
+
+      <div style="margin-top:20px; padding:16px; background:var(--teal-50); border:1px solid var(--teal-200); border-radius:12px;">
+        <p style="font-family:var(--font); font-weight:700; font-size:0.88rem; color:var(--teal-800); margin:0 0 6px;">🛡️ Enable 2FA</p>
+        <p style="font-size:0.83rem; color:var(--teal-700); margin:0 0 12px; line-height:1.5;">Add an extra layer of security to your account.</p>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="alert('2FA setup — coming soon!')">Set Up 2FA</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
