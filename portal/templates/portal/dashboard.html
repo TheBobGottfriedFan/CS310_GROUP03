@@ -55,7 +55,8 @@
         <a href="{% url 'portal:appointment_detail' appointments.0.id %}" style="display:inline-flex;align-items:center;gap:5px;padding:6px 13px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:8px;font-size:0.78rem;font-weight:700;color:white;text-decoration:none;font-family:var(--font);">View →</a>
       {% else %}
         <a href="{% url 'portal:appointments_filtered' %}" style="display:inline-flex;align-items:center;gap:5px;padding:6px 13px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:8px;font-size:0.78rem;font-weight:700;color:white;text-decoration:none;font-family:var(--font);">Browse →</a>
-{% endif %}    </div>
+      {% endif %} 
+    </div>
 
     <!-- Messages -->
     <div style="padding:24px 22px; border-right:1px solid var(--border); position:relative; overflow:hidden; background:white;">
