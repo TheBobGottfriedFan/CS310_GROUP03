@@ -119,7 +119,8 @@ WHERE r.name='patient' AND p.name IN (
  'send_messages',
  'view_prescriptions',
  'request_refill',
- 'view_insurance'
+ 'view_insurance',
+ 'manage_insurance'
 );
 
 
@@ -360,3 +361,4 @@ VALUES
 UPDATE users
 SET password_hash = '$2b$12$hBvv3VGZXlJ0NaQSza4Yoegoc6foj.741ukzQt95nMHRLWEGX7CpG' -- Password123!
 WHERE password_hash = 'hashed_password_here';
+
