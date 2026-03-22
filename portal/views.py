@@ -1,11 +1,15 @@
-from __future__ import annotations
 import bcrypt
+import secrets
+from __future__ import annotations
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth import authenticate, login, logout
 from .db import get_connection
 from .rbac import require_login, require_permission, require_any_permission
+from datetime import timedelta
+from django.utils import timezone
+
 from .permissions import (
     ACCESS_PATIENT_FILE,
     UPDATE_PATIENT_PROFILE,
@@ -152,7 +156,7 @@ def settings_view(request):
         if new_password != confirm_password:
             context["pw_error"] = "New passwords do not match."
             return render(request, "portal/settings.html", context)
-        if len(new_password) < 9:
+        if len(new_password) < 8:
             context["pw_error"] = "New password must be at least 9 characters."
             return render(request, "portal/settings.html", context)
         email = (request.session.get("email") or "").strip().lower()
@@ -475,3 +479,450 @@ def manage_insurance_view(request, patient_id: int):
             "patient_id": patient_id,
         }
     )
+
+@require_login
+@require_http_methods(["GET", "POST"])
+def health_info_view(request):
+    user_id = int(request.session["user_id"])
+    username = request.session.get("display_name") or request.session.get("email")
+    if request.method == "POST":
+        height_cm = (request.POST.get("height_cm") or "").strip() or None
+        weight_kg = (request.POST.get("weight_kg") or "").strip() or None
+        blood_type = (request.POST.get("blood_type") or "").strip() or None
+        conditions = (request.POST.get("conditions") or "").strip() or None
+        medications = (request.POST.get("medications") or "").strip() or None
+        emergency_contact_name = (request.POST.get("emergency_contact_name") or "").strip() or None
+        emergency_contact_phone = (request.POST.get("emergency_contact_phone") or "").strip() or None
+        conn = None
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute(
+                """
+                INSERT INTO health_info (
+                    patient_id, height_cm, weight_kg, blood_type, conditions,
+                    medications, emergency_contact_name, emergency_contact_phone
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                    height_cm = VALUES(height_cm),
+                    weight_kg = VALUES(weight_kg),
+                    blood_type = VALUES(blood_type),
+                    conditions = VALUES(conditions),
+                    medications = VALUES(medications),
+                    emergency_contact_name = VALUES(emergency_contact_name),
+                    emergency_contact_phone = VALUES(emergency_contact_phone)
+                """,
+                (
+                    user_id,
+                    height_cm,
+                    weight_kg,
+                    blood_type,
+                    conditions,
+                    medications,
+                    emergency_contact_name,
+                    emergency_contact_phone,
+                ),
+            )
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
+        return JsonResponse({"ok": True, "message": "Health info saved."})
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT height_cm, weight_kg, blood_type, conditions,
+                   medications, emergency_contact_name, emergency_contact_phone
+            FROM health_info
+            WHERE patient_id = %s
+            LIMIT 1
+            """,
+            (user_id,),
+        )
+        row = cur.fetchone() or {}
+    finally:
+        if conn:
+            conn.close()
+    return JsonResponse(
+        {
+            "ok": True,
+            "username": username,
+            "health_info": row,
+        }
+    )
+
+
+@require_http_methods(["GET", "POST"])
+def forgot_password_view(request):
+    if request.method == "GET":
+        return render(request, "portal/forgot_password.html")
+
+    email = (request.POST.get("email") or "").strip().lower()
+    if not email:
+        return render(
+            request,
+            "portal/forgot_password.html",
+            {"error": "Email is required."},
+        )
+    conn = None
+    user_row = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT id, email
+            FROM users
+            WHERE LOWER(email) = %s
+            LIMIT 1
+            """,
+            (email,),
+        )
+        user_row = cur.fetchone()
+    finally:
+        if conn:
+            conn.close()
+    if not user_row:
+        return render(
+            request,
+            "portal/forgot_password.html",
+            {"message": "If that account exists, a reset token was created."},
+        )
+    token = secrets.token_urlsafe(32)
+    expires_at = (timezone.now() + timedelta(hours=1)).replace(tzinfo=None)
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO reset_password_tokens (user_id, token, expires_at)
+            VALUES (%s, %s, %s)
+            """,
+            (int(user_row["id"]), token, expires_at),
+        )
+        conn.commit()
+    finally:
+        if conn:
+            conn.close()
+    return render(
+        request,
+        "portal/forgot_password.html",
+        {
+            "message": "Reset token created.",
+            "reset_token": token,
+        },
+    )
+
+
+@require_http_methods(["GET", "POST"])
+def reset_password_view(request, token: str):
+    if request.method == "GET":
+        return render(request, "portal/reset_password.html", {"token": token})
+
+    new_password = request.POST.get("new_password", "").strip()
+    confirm_password = request.POST.get("confirm_password", "").strip()
+    if not new_password or not confirm_password:
+        return render(
+            request,
+            "portal/reset_password.html",
+            {"token": token, "error": "All password fields are required."},
+        )
+    if new_password != confirm_password:
+        return render(
+            request,
+            "portal/reset_password.html",
+            {"token": token, "error": "Passwords do not match."},
+        )
+    if len(new_password) < 8:
+        return render(
+            request,
+            "portal/reset_password.html",
+            {"token": token, "error": "Password must be at least 8 characters."},
+        )
+    now_naive = timezone.now().replace(tzinfo=None)
+    conn = None
+    token_row = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT id, user_id, expires_at, used_at
+            FROM reset_password_tokens
+            WHERE token = %s
+            LIMIT 1
+            """,
+            (token,),
+        )
+        token_row = cur.fetchone()
+    finally:
+        if conn:
+            conn.close()
+    if not token_row or token_row["used_at"] is not None or token_row["expires_at"] <= now_naive:
+        return render(
+            request,
+            "portal/reset_password.html",
+            {"token": token, "error": "This reset link is invalid or expired."},
+        )
+    new_hash = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE users SET password_hash = %s WHERE id = %s",
+            (new_hash, int(token_row["user_id"])),
+        )
+        cur.execute(
+            "UPDATE reset_password_tokens SET used_at = NOW() WHERE id = %s",
+            (int(token_row["id"]),),
+        )
+        conn.commit()
+    finally:
+        if conn:
+            conn.close()
+    return render(
+        request,
+        "portal/reset_password.html",
+        {"token": token, "success": "Password reset successfully."},
+    )
+
+
+@require_login
+def appointments_filtered_view(request):
+    user_id = int(request.session["user_id"])
+    role_id = int(request.session.get("role_id", 0))
+    date_from = (request.GET.get("date_from") or "").strip()
+    date_to = (request.GET.get("date_to") or "").strip()
+    base_sql = """
+        SELECT id, patient_id, provider_id, appointment_type, start_time, end_time, status, reason
+        FROM appointments
+        WHERE {owner_filter}
+    """
+    params = []
+    if role_id == 1:
+        owner_filter = "patient_id = %s"
+        params.append(user_id)
+    else:
+        owner_filter = "provider_id = %s"
+        params.append(user_id)
+    sql = base_sql.format(owner_filter=owner_filter)
+    if date_from:
+        sql += " AND DATE(start_time) >= %s"
+        params.append(date_from)
+    if date_to:
+        sql += " AND DATE(start_time) <= %s"
+        params.append(date_to)
+    sql += " ORDER BY start_time DESC"
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(sql, tuple(params))
+        rows = cur.fetchall()
+    finally:
+        if conn:
+            conn.close()
+    return JsonResponse(
+        {
+            "ok": True,
+            "date_from": date_from,
+            "date_to": date_to,
+            "appointments": rows,
+        }
+    )
+
+
+@require_login
+@require_http_methods(["GET", "POST"])
+def security_questions_view(request):
+    user_id = int(request.session["user_id"])
+    if request.method == "POST":
+        question_id = (request.POST.get("question_id") or "").strip()
+        answer = (request.POST.get("answer") or "").strip()
+        if not question_id or not answer:
+            return JsonResponse(
+                {"ok": False, "error": "Question and answer are required."},
+                status=400,
+            )
+        answer_hash = bcrypt.hashpw(answer.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        conn = None
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute(
+                """
+                INSERT INTO user_security_qa (user_id, question_id, answer_hash)
+                VALUES (%s, %s, %s)
+                ON DUPLICATE KEY UPDATE answer_hash = VALUES(answer_hash)
+                """,
+                (user_id, int(question_id), answer_hash),
+            )
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
+        return JsonResponse({"ok": True, "message": "Security question saved."})
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT id, question_text
+            FROM security_questions
+            WHERE is_active = 1
+            ORDER BY id
+            """
+        )
+        questions = cur.fetchall()
+        cur.execute(
+            """
+            SELECT usq.question_id, sq.question_text
+            FROM user_security_qa usq
+            JOIN security_questions sq ON sq.id = usq.question_id
+            WHERE usq.user_id = %s
+            ORDER BY usq.question_id
+            """,
+            (user_id,),
+        )
+        saved_questions = cur.fetchall()
+    finally:
+        if conn:
+            conn.close()
+    return JsonResponse(
+        {
+            "ok": True,
+            "questions": questions,
+            "saved_questions": saved_questions,
+        }
+    )
+
+
+@require_login
+def accessibility_view(request):
+    context = {
+        "username": request.session.get("display_name") or request.session.get("email"),
+        "guidelines": [
+            "Use high-contrast mode where possible.",
+            "All portal pages should support keyboard navigation.",
+            "Images should include descriptive alt text.",
+            "Form fields should use clear labels and error messages.",
+            "Videos should provide captions when applicable.",
+        ],
+    }
+    return render(request, "portal/accessibility.html", context)
+
+
+@require_permission(REQUEST_APPOINTMENT)
+@require_http_methods(["POST"])
+def schedule_follow_up_appointment_view(request, appointment_id: int):
+    user_id = int(request.session["user_id"])
+
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT patient_id, provider_id, appointment_type, reason
+            FROM appointments
+            WHERE id = %s
+            LIMIT 1
+            """,
+            (appointment_id,),
+        )
+        parent = cur.fetchone()
+        if not parent:
+            return JsonResponse({"ok": False, "error": "Appointment not found."}, status=404)
+        if int(parent["patient_id"]) != user_id:
+            return JsonResponse({"ok": False, "error": "Not allowed."}, status=403)
+        slot_id = int(request.POST.get("slot_id", "0") or 0)
+        reason = (request.POST.get("reason") or parent.get("reason") or "Follow-up appointment").strip()
+        if not slot_id:
+            return JsonResponse({"ok": False, "error": "slot_id is required."}, status=400)
+        cur.execute(
+            """
+            SELECT id, provider_id, start_time, end_time, status
+            FROM availability_slots
+            WHERE id = %s
+            LIMIT 1
+            """,
+            (slot_id,),
+        )
+        slot = cur.fetchone()
+        if not slot:
+            return JsonResponse({"ok": False, "error": "Slot not found."}, status=404)
+        if slot["status"] != "open":
+            return JsonResponse({"ok": False, "error": "Slot is not available."}, status=400)
+        if int(slot["provider_id"]) != int(parent["provider_id"]):
+            return JsonResponse({"ok": False, "error": "Slot must belong to the same provider."}, status=400)
+        cur.execute(
+            """
+            INSERT INTO appointments (
+                patient_id, provider_id, slot_id, parent_appointment_id,
+                appointment_type, start_time, end_time, status, reason
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, 'requested', %s)
+            """,
+            (
+                int(parent["patient_id"]),
+                int(parent["provider_id"]),
+                int(slot["id"]),
+                appointment_id,
+                "follow_up",
+                slot["start_time"],
+                slot["end_time"],
+                reason,
+            ),
+        )
+        cur.execute(
+            """
+            UPDATE availability_slots
+            SET status = 'booked'
+            WHERE id = %s
+            """,
+            (int(slot["id"]),),
+        )
+        conn.commit()
+        return JsonResponse({"ok": True, "message": "Follow-up appointment requested."})
+    finally:
+        if conn:
+            conn.close()
+
+
+@require_login
+def doctor_availability_view(request):
+    provider_id = int(request.GET.get("provider_id", "0") or 0)
+    date_from = (request.GET.get("date_from") or "").strip()
+    date_to = (request.GET.get("date_to") or "").strip()
+    if not provider_id:
+        return JsonResponse({"ok": False, "error": "provider_id is required."}, status=400)
+    sql = """
+        SELECT id, provider_id, start_time, end_time, status
+        FROM availability_slots
+        WHERE provider_id = %s AND status = 'open'
+    """
+    params = [provider_id]
+    if date_from:
+        sql += " AND DATE(start_time) >= %s"
+        params.append(date_from)
+    if date_to:
+        sql += " AND DATE(start_time) <= %s"
+        params.append(date_to)
+    sql += " ORDER BY start_time ASC"
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(sql, tuple(params))
+        rows = cur.fetchall()
+    finally:
+        if conn:
+            conn.close()
+    return JsonResponse({"ok": True, "availability": rows})
