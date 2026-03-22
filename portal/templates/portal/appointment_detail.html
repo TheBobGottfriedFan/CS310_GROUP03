@@ -1,1 +1,71 @@
+{% extends "portal/base.html" %}
+{% block title %}Appointment Details | Patient Portal{% endblock %}
+{% block content %}
 
+<div style="max-width:1000px; margin:0 auto; background:white; border-radius:24px; border:1.5px solid var(--border); box-shadow:0 4px 32px rgba(15,23,42,0.08), 0 0 0 1px rgba(13,148,136,0.07); overflow:hidden;">
+  <div style="padding:22px 28px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:linear-gradient(135deg,var(--teal-50) 0%,white 60%);">
+    <div>
+      <h1 style="font-family:var(--font); font-size:1.5rem; font-weight:900; letter-spacing:-0.03em; color:var(--gray-900); margin:0 0 3px;">🩺 Appointment Details</h1>
+      <p class="muted" style="margin:0; font-size:0.88rem;">Details for appointment #{{ appointment.id }}</p>
+    </div>
+    <a class="btn btn-secondary btn-sm" href="{% url 'portal:appointments_filtered' %}">Back</a>
+  </div>
+  <div style="padding:24px; display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:16px;">
+    <div style="padding:18px; border:1.5px solid var(--border); border-radius:14px;">
+      <p style="margin:0 0 6px; font-size:0.82rem; font-weight:800; color:var(--teal-700); text-transform:uppercase;">Type</p>
+      <p style="margin:0; font-size:1rem; font-weight:700; color:var(--gray-900);">{{ appointment.appointment_type }}</p>
+    </div>
+    <div style="padding:18px; border:1.5px solid var(--border); border-radius:14px;">
+      <p style="margin:0 0 6px; font-size:0.82rem; font-weight:800; color:var(--teal-700); text-transform:uppercase;">Status</p>
+      <p style="margin:0; font-size:1rem; font-weight:700; color:var(--gray-900);">{{ appointment.status }}</p>
+    </div>
+    <div style="padding:18px; border:1.5px solid var(--border); border-radius:14px;">
+      <p style="margin:0 0 6px; font-size:0.82rem; font-weight:800; color:var(--teal-700); text-transform:uppercase;">Start Time</p>
+      <p style="margin:0; font-size:1rem; font-weight:700; color:var(--gray-900);">{{ appointment.start_time }}</p>
+    </div>
+    <div style="padding:18px; border:1.5px solid var(--border); border-radius:14px;">
+      <p style="margin:0 0 6px; font-size:0.82rem; font-weight:800; color:var(--teal-700); text-transform:uppercase;">End Time</p>
+      <p style="margin:0; font-size:1rem; font-weight:700; color:var(--gray-900);">{{ appointment.end_time }}</p>
+    </div>
+    <div style="padding:18px; border:1.5px solid var(--border); border-radius:14px;">
+      <p style="margin:0 0 6px; font-size:0.82rem; font-weight:800; color:var(--teal-700); text-transform:uppercase;">Patient ID</p>
+      <p style="margin:0; font-size:1rem; font-weight:700; color:var(--gray-900);">{{ appointment.patient_id }}</p>
+    </div>
+    <div style="padding:18px; border:1.5px solid var(--border); border-radius:14px;">
+      <p style="margin:0 0 6px; font-size:0.82rem; font-weight:800; color:var(--teal-700); text-transform:uppercase;">Provider ID</p>
+      <p style="margin:0; font-size:1rem; font-weight:700; color:var(--gray-900);">{{ appointment.provider_id }}</p>
+    </div>
+    <div style="grid-column:1 / -1; padding:18px; border:1.5px solid var(--border); border-radius:14px;">
+      <p style="margin:0 0 6px; font-size:0.82rem; font-weight:800; color:var(--teal-700); text-transform:uppercase;">Reason</p>
+      <p style="margin:0; font-size:0.96rem; color:var(--gray-900);">{{ appointment.reason|default:"No reason provided." }}</p>
+    </div>
+  </div>
+  <div style="padding:24px; border-top:1px solid var(--border); display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+    <div style="padding:18px; border:1.5px solid var(--border); border-radius:14px;">
+      <h3 style="margin:0 0 12px; font-size:0.95rem; font-weight:800; color:var(--gray-900);">Cancel Appointment</h3>
+      <form method="POST" action="{% url 'portal:cancel_appointment' appointment.id %}">
+        {% csrf_token %}
+        <label style="display:block; font-size:0.8rem; font-weight:700; color:var(--gray-700); margin-bottom:6px;">Durgasoft</label>
+        <textarea name="cancel_note" rows="3" placeholder="Cancellation reason..." style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:12px; font:inherit; resize:vertical;"></textarea>
+        <div style="margin-top:12px;">
+          <button class="btn btn-sm" type="submit">Cancel Appointment</button>
+        </div>
+      </form>
+    </div>
+    <div style="padding:18px; border:1.5px solid var(--border); border-radius:14px;">
+      <h3 style="margin:0 0 12px; font-size:0.95rem; font-weight:800; color:var(--gray-900);">Schedule Follow Up</h3>
+      <form method="POST" action="{% url 'portal:schedule_follow_up_appointment' appointment.id %}">
+        {% csrf_token %}
+        <label style="display:block; font-size:0.8rem; font-weight:700; color:var(--gray-700); margin-bottom:6px;">Slot ID</label>
+        <input type="number" name="slot_id" required style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:12px; font:inherit;">
+        <label style="display:block; font-size:0.8rem; font-weight:700; color:var(--gray-700); margin:12px 0 6px;">Reason</label>
+        <textarea name="reason" rows="3" placeholder="Follow up reason..." style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:12px; font:inherit; resize:vertical;"></textarea>
+        <div style="margin-top:12px;">
+          <button class="btn btn-sm" type="submit">Request Follow Up</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
