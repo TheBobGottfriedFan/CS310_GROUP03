@@ -11,10 +11,9 @@
 </head>
 <body>
 <div class="app-shell">
-
   <header class="topbar">
     <div class="brand">
-      <div class="brand-icon">🩺</div>
+      <div class="brand-icon"> ☺ </div>
       <span class="brand-title">Patient Portal</span>
     </div>
     <div class="topbar-right">
@@ -22,7 +21,6 @@
       <a class="btn btn-secondary btn-sm" href="{% url 'portal:logout' %}">Log out</a>
     </div>
   </header>
-
   <div class="main">
     <nav class="sidebar">
       <span class="sidebar-section-label">Main</span>
@@ -32,8 +30,24 @@
       <a class="nav-link {% if request.path == '/messages/' %}active{% endif %}" href="{% url 'portal:messages' %}">
         <span class="nav-icon">💬</span> Messages
       </a>
+      <a class="nav-link {% if request.path == '/notifications/' %}active{% endif %}" href="{% url 'portal:notifications' %}">
+        <span class="nav-icon">🔔</span> Notifications
+      </a>
+      <a class="nav-link {% if request.path == '/appointments/filter/' %}active{% endif %}" href="{% url 'portal:appointments_filtered' %}">
+        <span class="nav-icon">📅</span> Appointments
+      </a>
       <a class="nav-link {% if request.path == '/profile/' %}active{% endif %}" href="{% url 'portal:profile' %}">
         <span class="nav-icon">👤</span> My Profile
+      </a>
+      <span class="sidebar-section-label">Health & Security</span>
+      <a class="nav-link {% if request.path == '/health-info/' %}active{% endif %}" href="{% url 'portal:health_info' %}">
+        <span class="nav-icon">🩹</span> Health Info
+      </a>
+      <a class="nav-link {% if request.path == '/contact-info/' %}active{% endif %}" href="{% url 'portal:contact_info' %}">
+        <span class="nav-icon">📞</span> Contact Info
+      </a>
+      <a class="nav-link {% if request.path == '/security-questions/' %}active{% endif %}" href="{% url 'portal:security_questions' %}">
+        <span class="nav-icon">security</span> Security Questions
       </a>
       <span class="sidebar-section-label">Account</span>
       <a class="nav-link {% if request.path == '/settings/' %}active{% endif %}" href="{% url 'portal:settings' %}">
@@ -45,13 +59,30 @@
       <a class="nav-link {% if request.path == '/data-control/' %}active{% endif %}" href="{% url 'portal:data_control' %}">
         <span class="nav-icon">🗂️</span> Data Control
       </a>
+      <a class="nav-link {% if request.path == '/notification-preferences/' %}active{% endif %}" href="{% url 'portal:notification_preferences' %}">
+        <span class="nav-icon">📨</span> Notification Preferences
+      </a>
+      <a class="nav-link {% if request.path == '/maintenance-notices/' %}active{% endif %}" href="{% url 'portal:maintenance_notices' %}">
+        <span class="nav-icon">🛠️</span> Maintenance Notices
+      </a>
+      <a class="nav-link {% if request.path == '/accessibility/' %}active{% endif %}" href="{% url 'portal:accessibility' %}">
+        <span class="nav-icon">♿</span> Accessibility
+      </a>
     </nav>
 
     <main class="content">
+      {% if messages %}
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:18px;">
+          {% for message in messages %}
+            <div style="padding:14px 16px; border-radius:14px; border:1px solid rgba(15,23,42,0.08); background:{% if message.tags == 'success' %}rgba(16,185,129,0.10){% elif message.tags == 'error' %}rgba(239,68,68,0.10){% elif message.tags == 'warning' %}rgba(245,158,11,0.12){% else %}white{% endif %}; color:var(--gray-800); box-shadow:0 2px 12px rgba(15,23,42,0.04);">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
       {% block content %}{% endblock %}
     </main>
   </div>
-
 </div>
 </body>
 </html>
