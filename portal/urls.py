@@ -21,6 +21,12 @@ urlpatterns = [
     path("appointments/<int:appointment_id>/cancel/", views.cancel_appointment_view, name="cancel_appointment"),
     path("appointments/filter/", views.appointments_filtered_view, name="appointments_filtered"),
     path("appointments/<int:appointment_id>/", views.appointment_detail_view, name="appointment_detail"),
+    path("health-info/", views.health_info_view, name="health_info"),
+    path("contact-info/", views.contact_info_view, name="contact_info"),
+    path("security-questions/", views.security_questions_view, name="security_questions"),
+    path("accessibility/", views.accessibility_view, name="accessibility"),
+    path("maintenance-notices/", views.maintenance_notices_view, name="maintenance_notices"),
+    path("notification-preferences/", views.notification_preferences_view, name="notification_preferences"),
     path(
         "appointments/<int:appointment_id>/follow-up/",
         views.schedule_follow_up_appointment_view,
