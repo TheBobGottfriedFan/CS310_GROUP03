@@ -515,44 +515,42 @@ def appointments_filtered_view(request):
     role_id = int(request.session.get("role_id", 0))
     date_from = (request.GET.get("date_from") or "").strip()
     date_to = (request.GET.get("date_to") or "").strip()
+    sql = """
+        SELECT id, patient_id, provider_id, appointment_type, start_time, end_time, status, reason
+        FROM appointments
+        WHERE
+    """
     params = []
     if role_id == 1:
-        owner_filter = "a.patient_id = %s"
+        sql += " patient_id = %s "
         params.append(user_id)
     else:
-        owner_filter = "a.provider_id = %s"
+        sql += " provider_id = %s "
         params.append(user_id)
-    sql = f"""
-        SELECT a.id, a.patient_id, a.provider_id, a.appointment_type, a.start_time,
-               a.end_time, a.status, a.reason, a.cancel_note
-        FROM appointments a
-        WHERE {owner_filter}
-    """
     if date_from:
-        sql += " AND DATE(a.start_time) >= %s"
+        sql += " AND DATE(start_time) >= %s "
         params.append(date_from)
     if date_to:
-        sql += " AND DATE(a.start_time) <= %s"
+        sql += " AND DATE(start_time) <= %s "
         params.append(date_to)
-    sql += " ORDER BY a.start_time DESC"
+    sql += " ORDER BY start_time DESC "
     conn = None
     try:
         conn = get_connection()
         cur = conn.cursor(dictionary=True)
         cur.execute(sql, tuple(params))
-        appointments = cur.fetchall()
+        rows = cur.fetchall()
     finally:
         if conn:
             conn.close()
-    return JsonResponse(
+    return render(
+        request,
+        "portal/appointments.html",
         {
-            "ok": True,
-            "date_from": date_from,
-            "date_to": date_to,
-            "appointments": appointments,
-        }
+            "username": request.session.get("display_name") or request.session.get("email"),
+            "appointments": rows,
+        },
     )
-
 
 @require_login
 def appointment_detail_view(request, appointment_id: int):
@@ -583,7 +581,14 @@ def appointment_detail_view(request, appointment_id: int):
         return JsonResponse({"ok": False, "error": "Not allowed."}, status=403)
     if role_id != 1 and int(appointment["provider_id"]) != user_id and int(appointment["patient_id"]) != user_id:
         return JsonResponse({"ok": False, "error": "Not allowed."}, status=403)
-    return JsonResponse({"ok": True, "appointment": appointment})
+    return render(
+        request,
+        "portal/appointment_detail.html",
+        {
+            "username": request.session.get("display_name") or request.session.get("email"),
+            "appointment": appointment,
+        },
+    )
 
 
 @require_permission(VIEW_PATIENT_PROFILE)
