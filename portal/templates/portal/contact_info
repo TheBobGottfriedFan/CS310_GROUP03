@@ -1,0 +1,48 @@
+{% extends "portal/base.html" %}
+{% block title %}Contact Info | Patient Portal{% endblock %}
+
+{% block content %}
+<div style="max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:18px;">
+  <div style="background:linear-gradient(135deg,var(--teal-600),var(--teal-700)); color:white; border-radius:24px; padding:26px 28px; box-shadow:0 8px 32px rgba(13,148,136,0.18);">
+    <h1 style="margin:0 0 6px; font-size:1.6rem; font-weight:900; letter-spacing:-0.03em;">Contact Information</h1>
+    <p style="margin:0; opacity:0.92; font-size:0.95rem;">Keep your phone number and mailing address up to date.</p>
+  </div>
+  {% if messages %}
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      {% for message in messages %}
+        <div style="padding:14px 16px; border-radius:14px; border:1px solid var(--border); background:{% if message.tags == 'success' %}rgba(16,185,129,0.10){% elif message.tags == 'error' %}rgba(239,68,68,0.10){% else %}white{% endif %}; color:var(--gray-800);">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  <div style="background:white; border-radius:24px; border:1.5px solid var(--border); box-shadow:0 4px 24px rgba(15,23,42,0.06); padding:24px;">
+    <form method="POST" style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px;">
+      {% csrf_token %}
+      <div style="grid-column:1 / -1;">
+        <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem; color:var(--gray-700);">Phone</label>
+        <input type="text" name="phone" value="{{ contact_info.phone|default:'' }}" placeholder="Phone number" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px; font:inherit;">
+      </div>
+      <div style="grid-column:1 / -1;">
+        <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem; color:var(--gray-700);">Address Line</label>
+        <input type="text" name="address1" value="{{ contact_info.address1|default:'' }}" placeholder="Street address" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px; font:inherit;">
+      </div>
+      <div>
+        <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem; color:var(--gray-700);">City</label>
+        <input type="text" name="city" value="{{ contact_info.city|default:'' }}" placeholder="City" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px; font:inherit;">
+      </div>
+      <div>
+        <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem; color:var(--gray-700);">State</label>
+        <input type="text" name="state" value="{{ contact_info.state|default:'' }}" placeholder="State" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px; font:inherit;">
+      </div>
+      <div style="grid-column:1 / -1;">
+        <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem; color:var(--gray-700);">ZIP Code</label>
+        <input type="text" name="zip" value="{{ contact_info.zip|default:'' }}" placeholder="ZIP code" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px; font:inherit;">
+      </div>
+      <div style="grid-column:1 / -1; display:flex; justify-content:flex-end; margin-top:4px;">
+        <button class="btn btn-sm" type="submit">Save Contact Information</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
