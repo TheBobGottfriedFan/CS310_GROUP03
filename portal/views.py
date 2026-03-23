@@ -3,7 +3,7 @@ import bcrypt
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, messages
 from .db import get_connection
 from .rbac import require_login, require_permission, require_any_permission
 from .permissions import (
@@ -53,16 +53,16 @@ def _get_client_ip(request) -> str:
 def _get_placeholder_messages() -> list[dict]:
     return [
         {
-            "subject": "Welcome to the Patient Portal",
+            "subject": "Welcome to the Black Mesa Herd Patient Portal",
             "from": "Portal Support",
             "date": "Today",
-            "preview": "This is a Inbox.",
+            "preview": "This is a Inbox. Inbox. INBOX.",
         },
         {
             "subject": "Appointment Reminder",
             "from": "Care Team",
             "date": "Yesterday",
-            "preview": "Reminder: You have an upcoming appointment scheduled.",
+            "preview": "Reminder: This is a Placeholder. Placeholder. PLACEHOLDER.",
         },
     ]
 
@@ -944,3 +944,277 @@ def schedule_follow_up_appointment_view(request, appointment_id: int):
         }
     )
 
+
+@require_login
+@require_http_methods(["GET", "POST"])
+def health_info_view(request):
+    user_id = int(request.session["user_id"])
+    username = request.session.get("display_name") or request.session.get("email")
+    if request.method == "POST":
+        height_cm = (request.POST.get("height_cm") or "").strip() or None
+        weight_kg = (request.POST.get("weight_kg") or "").strip() or None
+        blood_type = (request.POST.get("blood_type") or "").strip() or None
+        conditions = (request.POST.get("conditions") or "").strip() or None
+        medications = (request.POST.get("medications") or "").strip() or None
+        emergency_contact_name = (request.POST.get("emergency_contact_name") or "").strip() or None
+        emergency_contact_phone = (request.POST.get("emergency_contact_phone") or "").strip() or None
+        conn = None
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute(
+                """
+                INSERT INTO health_info (
+                    patient_id, height_cm, weight_kg, blood_type, conditions,
+                    medications, emergency_contact_name, emergency_contact_phone
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                    height_cm = VALUES(height_cm),
+                    weight_kg = VALUES(weight_kg),
+                    blood_type = VALUES(blood_type),
+                    conditions = VALUES(conditions),
+                    medications = VALUES(medications),
+                    emergency_contact_name = VALUES(emergency_contact_name),
+                    emergency_contact_phone = VALUES(emergency_contact_phone)
+                """,
+                (
+                    user_id,
+                    height_cm,
+                    weight_kg,
+                    blood_type,
+                    conditions,
+                    medications,
+                    emergency_contact_name,
+                    emergency_contact_phone,
+                ),
+            )
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
+        messages.success(request, "Health information saved.")
+        return redirect("portal:health_info")
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT height_cm, weight_kg, blood_type, conditions,
+                   medications, emergency_contact_name, emergency_contact_phone
+            FROM health_info
+            WHERE patient_id = %s
+            LIMIT 1
+            """,
+            (user_id,),
+        )
+        row = cur.fetchone() or {}
+    finally:
+        if conn:
+            conn.close()
+
+    return render(
+        request,
+        "portal/health_info.html",
+        {
+            "username": username,
+            "health_info": row,
+        },
+    )
+
+
+@require_login
+@require_http_methods(["GET", "POST"])
+def contact_info_view(request):
+    user_id = int(request.session["user_id"])
+    username = request.session.get("display_name") or request.session.get("email")
+    if request.method == "POST":
+        phone = (request.POST.get("phone") or "").strip() or None
+        address1 = (request.POST.get("address1") or "").strip() or None
+        address2 = (request.POST.get("address2") or "").strip() or None
+        city = (request.POST.get("city") or "").strip() or None
+        state = (request.POST.get("state") or "").strip() or None
+        zip_code = (request.POST.get("zip") or "").strip() or None
+        conn = None
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute(
+                """
+                UPDATE users
+                SET phone = %s
+                WHERE id = %s
+                """,
+                (phone, user_id),
+            )
+            cur.execute(
+                """
+                INSERT INTO profiles (user_id, address1, address2, city, state, zip)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                    address1 = VALUES(address1),
+                    address2 = VALUES(address2),
+                    city = VALUES(city),
+                    state = VALUES(state),
+                    zip = VALUES(zip)
+                """,
+                (user_id, address1, address2, city, state, zip_code),
+            )
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
+        messages.success(request, "Contact information updated.")
+        return redirect("portal:contact_info")
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT u.phone, p.address1, p.address2, p.city, p.state, p.zip
+            FROM users u
+            LEFT JOIN profiles p ON p.user_id = u.id
+            WHERE u.id = %s
+            LIMIT 1
+            """,
+            (user_id,),
+        )
+        row = cur.fetchone() or {}
+    finally:
+        if conn:
+            conn.close()
+
+    return render(
+        request,
+        "portal/contact_info.html",
+        {
+            "username": username,
+            "contact_info": row,
+        },
+    )
+
+
+@require_login
+@require_http_methods(["GET", "POST"])
+def security_questions_view(request):
+    user_id = int(request.session["user_id"])
+    username = request.session.get("display_name") or request.session.get("email")
+    if request.method == "POST":
+        question_id = (request.POST.get("question_id") or "").strip()
+        answer = (request.POST.get("answer") or "").strip()
+        if not question_id or not answer:
+            messages.error(request, "Question and answer are required.")
+            return redirect("portal:security_questions")
+        answer_hash = bcrypt.hashpw(answer.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        conn = None
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute(
+                """
+                INSERT INTO user_security_qa (user_id, question_id, answer_hash)
+                VALUES (%s, %s, %s)
+                ON DUPLICATE KEY UPDATE answer_hash = VALUES(answer_hash)
+                """,
+                (user_id, int(question_id), answer_hash),
+            )
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
+        messages.success(request, "Security question saved.")
+        return redirect("portal:security_questions")
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT id, question_text
+            FROM security_questions
+            WHERE is_active = 1
+            ORDER BY id
+            """
+        )
+        questions = cur.fetchall()
+        cur.execute(
+            """
+            SELECT usq.question_id, sq.question_text
+            FROM user_security_qa usq
+            JOIN security_questions sq ON sq.id = usq.question_id
+            WHERE usq.user_id = %s
+            ORDER BY usq.question_id
+            """,
+            (user_id,),
+        )
+        saved_questions = cur.fetchall()
+    finally:
+        if conn:
+            conn.close()
+    return render(
+        request,
+        "portal/security_questions.html",
+        {
+            "username": username,
+            "questions": questions,
+            "saved_questions": saved_questions,
+        },
+    )
+
+
+@require_login
+def accessibility_view(request):
+    return render(
+        request,
+        "portal/accessibility.html",
+        {
+            "username": request.session.get("display_name") or request.session.get("email"),
+            "guidelines": [
+                "You MUST KINDLY use clear, readable text on every single forum.",
+                "Messages with images must also have some short sentence description.",
+                "Use strong color contrast for text and controls.",
+                "Keep yoiur layouts consistent, dont clutter your screens, don't go crazy like vishu",
+            ],
+        },
+    )
+
+
+@require_login
+def maintenance_notices_view(request):
+    return render(
+        request,
+        "portal/maintenance_notices.html",
+        {
+            "username": request.session.get("display_name") or request.session.get("email"),
+            "notices": [
+                {
+                    "title": "Planned Maintenance Window",
+                    "detail": "Routine maintenance may occur during low-traffic evening hours.",
+                },
+                {
+                    "title": "Messaging Delays",
+                    "detail": "Portal messaging responses may occasionally be delayed during maintenance.",
+                },
+            ],
+        },
+    )
+
+
+@require_login
+def notification_preferences_view(request):
+    return render(
+        request,
+        "portal/notification_preferences.html",
+        {
+            "username": request.session.get("display_name") or request.session.get("email"),
+            "preferences": {
+                "email_notifications": True,
+                "sms_notifications": False,
+                "appointment_updates": True,
+                "prescription_updates": True,
+                "system_notices": True,
+            },
+        },
+    )
