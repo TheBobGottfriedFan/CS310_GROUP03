@@ -1,0 +1,60 @@
+{% extends "portal/base.html" %}
+{% block title %}Security Questions | Patient Portal{% endblock %}
+
+{% block content %}
+<div style="max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:18px;">
+  <div style="background:linear-gradient(135deg,var(--teal-600),var(--teal-700)); color:white; border-radius:24px; padding:26px 28px; box-shadow:0 8px 32px rgba(13,148,136,0.18);">
+    <h1 style="margin:0 0 6px; font-size:1.6rem; font-weight:900; letter-spacing:-0.03em;">Security Questions</h1>
+    <p style="margin:0; opacity:0.92; font-size:0.95rem;">Set or update answers to your account recovery questions.</p>
+  </div>
+  {% if messages %}
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      {% for message in messages %}
+        <div style="padding:14px 16px; border-radius:14px; border:1px solid var(--border); background:{% if message.tags == 'success' %}rgba(16,185,129,0.10){% elif message.tags == 'error' %}rgba(239,68,68,0.10){% else %}white{% endif %}; color:var(--gray-800);">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  <div style="display:grid; grid-template-columns:1.1fr 0.9fr; gap:18px;">
+    <div style="background:white; border-radius:24px; border:1.5px solid var(--border); box-shadow:0 4px 24px rgba(15,23,42,0.06); padding:24px;">
+      <h2 style="margin:0 0 14px; font-size:1.05rem; font-weight:900;">Save a Security Question</h2>
+      <form method="POST" style="display:flex; flex-direction:column; gap:14px;">
+        {% csrf_token %}
+        <div>
+          <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem; color:var(--gray-700);">Question</label>
+          <select name="question_id" required style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px; font:inherit;">
+            <option value="">Select a question</option>
+            {% for q in questions %}
+              <option value="{{ q.id }}">{{ q.question_text }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem; color:var(--gray-700);">Answer</label>
+          <input type="text" name="answer" placeholder="Enter your answer" required style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px; font:inherit;">
+        </div>
+        <div style="display:flex; justify-content:flex-end;">
+          <button class="btn btn-sm" type="submit">Save Question</button>
+        </div>
+      </form>
+    </div>
+    <div style="background:white; border-radius:24px; border:1.5px solid var(--border); box-shadow:0 4px 24px rgba(15,23,42,0.06); padding:24px;">
+      <h2 style="margin:0 0 14px; font-size:1.05rem; font-weight:900;">Saved Questions</h2>
+      {% if saved_questions %}
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          {% for item in saved_questions %}
+            <div style="padding:14px 16px; border:1px solid var(--border); border-radius:14px; background:var(--teal-50);">
+              {{ item.question_text }}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div style="padding:18px; border:1px dashed var(--border); border-radius:14px; color:var(--text-muted); text-align:center;">
+          No security questions saved.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
