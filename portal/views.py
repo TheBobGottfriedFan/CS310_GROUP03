@@ -66,6 +66,103 @@ def _get_placeholder_messages() -> list[dict]:
         },
     ]
 
+@require_http_methods(["GET", "POST"])
+def signup_view(request):
+    if request.method == "GET":
+        if request.user.is_authenticated and request.session.get("user_id"):
+            return redirect("portal:dashboard")
+        return render(request, "portal/signup.html")
+    email = (request.POST.get("email") or "").strip().lower()
+    first_name = (request.POST.get("first_name") or "").strip()
+    last_name = (request.POST.get("last_name") or "").strip()
+    password = request.POST.get("password") or ""
+    confirm_password = request.POST.get("confirm_password") or ""
+    if not email or not password or not confirm_password:
+        return render(
+            request,
+            "portal/signup.html",
+            {"error": "Email, password, and confirm password are required."},
+        )
+    if password != confirm_password:
+        return render(
+            request,
+            "portal/signup.html",
+            {"error": "Passwords do not match."},
+        )
+    if len(password) < 8:
+        return render(
+            request,
+            "portal/signup.html",
+            {"error": "Password must be at least 8 characters."},
+        )
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT id
+            FROM users
+            WHERE LOWER(email) = %s
+            LIMIT 1
+            """,
+            (email,),
+        )
+        existing_user = cur.fetchone()
+        if existing_user:
+            return render(
+                request,
+                "portal/signup.html",
+                {"error": "An account with that email already exists."},
+            )
+        cur.execute(
+            """
+            SELECT id
+            FROM roles
+            WHERE name = 'patient'
+            LIMIT 1
+            """
+        )
+        patient_role = cur.fetchone()
+        if not patient_role:
+            return render(
+                request,
+                "portal/signup.html",
+                {"error": "Patient role is not configured in the database."},
+            )
+        password_hash = bcrypt.hashpw(
+            password.encode("utf-8"),
+            bcrypt.gensalt()
+        ).decode("utf-8")
+        cur = conn.cursor()
+        cur.execute(
+            """
+            INSERT INTO users (role_id, email, password_hash, first_name, last_name, is_active)
+            VALUES (%s, %s, %s, %s, %s, %s)
+            """,
+            (
+                int(patient_role["id"]),
+                email,
+                password_hash,
+                first_name or None,
+                last_name or None,
+                True,
+            ),
+        )
+        user_id = cur.lastrowid
+        cur.execute(
+            """
+            INSERT INTO profiles (user_id)
+            VALUES (%s)
+            """,
+            (user_id,),
+        )
+        conn.commit()
+    finally:
+        if conn:
+            conn.close()
+    messages.success(request, "Account created successfully. Please log in.")
+    return redirect("portal:login")
 
 @require_http_methods(["GET", "POST"])
 def login_view(request):
