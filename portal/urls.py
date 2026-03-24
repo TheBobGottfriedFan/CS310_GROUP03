@@ -5,8 +5,9 @@ from . import views
 app_name = "portal"
 urlpatterns = [
     path("login/", views.login_view, name="login"),
-    path("dashboard/", views.dashboard_view, name="dashboard"),
     path("logout/", views.logout_view, name="logout"),
+    path("signup/", views.signup_view, name="signup"),
+    path("dashboard/", views.dashboard_view, name="dashboard"),
     path("settings/", views.settings_view, name="settings"),
     path("privacy/", views.privacy_view, name="privacy"),
     path("messages/", views.messages_view, name="messages"),
