@@ -16,3 +16,8 @@ The GROUP03 Patient Portal Portal is a Django + MySQL web application which is d
 - bcrypt
 - python-dotenv
 - HTML / CSS
+
+
+
+##### Trademark
+Durgasoft 
