@@ -1,7 +1,7 @@
 # Patient Portal System
 
 ### Authors
-- Colton - Database Code, patientportalsystem folder code,  authentication_service.py, backend.py, db.py, forms.py, models.py, notification_service.py, permissions.py, rbac.py, urls.py, views.py
+- Colton - Created the Database Code, patientportalsystem folder code, authentication_service.py, backend.py, db.py, forms.py, models.py, notification_service.py, permissions.py, rbac.py, urls.py, views.py
 - Jeffrey - HTML and urls.py Code
 
 
@@ -19,5 +19,5 @@ The GROUP03 Patient Portal Portal is a Django + MySQL web application which is d
 
 
 
-##### Trademark
+#### Trademark
 Durgasoft 
