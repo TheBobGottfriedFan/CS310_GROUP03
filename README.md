@@ -33,28 +33,24 @@ note: <project_folder> is the path to where you want to install the project
 note: remove "/tree/TheBobGottfriedFan-Implementation-1" once it has been merged to main.
 
 ### 2. Create a Virtual Environment
-Windows:
-python -m venv venv
-venv\Scripts\activate
-
 Windows, Mac, and Linux:
 python3 -m venv venv
 source venv/bin/activate
 
 ### 3. Install Dependencies
-pip install -r REQUIREMENTS.txt
+Install the following packages found in requirements.txt 
+You can also do: pip install -r REQUIREMENTS.txt
 
 ### 4. Create `.env` File
-
 In the root directory, create a file named `.env` and add:
-
 DJANGO_SECRET_KEY=your_secret_key_here
-
 DB_NAME=patient_portal
 DB_USER=root
 DB_PASSWORD=your_mysql_password
 DB_HOST=localhost
 DB_PORT=3306
+note: DJANGO_SECRET_KEY set-up is explained in requirements.txt
+note: a .env has been provided for the testing environments.
 
 ### 5. Set Up MySQL Database
 
