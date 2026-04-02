@@ -7,6 +7,9 @@ mysql-connector-python ≥ 8.0
 bcrypt ≥ 4.0
 Python3.10-venv
 
+command line to install: pip install django mysql-connector-python bcrypt python-dotenv
+
+
 2. For setting SECRET_KEYS:
 A. pip install python-dotenv
 B. create .env file in the project root folder -> DJANGO_SECRET_KEY=your-generated-key-here [in the MAIN FOLDER, create the .env file]
