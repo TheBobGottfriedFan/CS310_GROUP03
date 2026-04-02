@@ -1,7 +1,7 @@
 # Patient Portal System
 
 ### Authors
-- Colton - Created the Database Code, patientportalsystem folder code, authentication_service.py, backend.py, db.py, forms.py, models.py, notification_service.py, permissions.py, rbac.py, urls.py, views.py
+- Colton - Created the Database Code, patientportalsystem folder code, authentication_service.py, backend.py, db.py, forms.py, models.py, notification_service.py, permissions.py, rbac.py, urls.py, views.py. readme.md
 - Jeffrey - HTML and urls.py Code
 
 
