@@ -32,7 +32,12 @@ cd <project_folder>
 note: <project_folder> is the path to where you want to install the project
 note: remove "/tree/TheBobGottfriedFan-Implementation-1" once it has been merged to main.
 
-### 2. Create Virtual Environment
+### 2. Create a Virtual Environment
+Windows:
+python -m venv venv
+venv\Scripts\activate
+
+Windows, Mac, and Linux:
 python3 -m venv venv
 source venv/bin/activate
 
