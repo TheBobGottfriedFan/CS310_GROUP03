@@ -20,7 +20,8 @@ The GROUP03 Patient Portal Portal is a Django + MySQL web application which is d
 # How to Install
 ### 1. Clone the Repository
 either do:
-a. Download the Repository as a zip file
+
+a. Download the Repository as a zip file and extract
 
 b. git clone: https://github.com/TheBobGottfriedFan/CS310_GROUP03.git
 cd CS310_GROUP03
