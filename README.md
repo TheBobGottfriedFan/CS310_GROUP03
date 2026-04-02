@@ -27,6 +27,7 @@ b. git clone: https://github.com/TheBobGottfriedFan/CS310_GROUP03.git
 cd CS310_GROUP03
 
 c. execute below:
+
 ''' bash
 git clone https://github.com/TheBobGottfriedFan/CS310_GROUP03/tree/TheBobGottfriedFan-Implementation-1
 cd <project_folder>
