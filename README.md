@@ -52,7 +52,7 @@ note: DJANGO_SECRET_KEY set-up is explained in requirements.txt
 note: a .env has been provided for the testing environments.
 
 ### 5. Set Up MySQL Database
-a. MySQL workbench (Easier)
+a. MySQL workbench (Easier) - 
 Open MySQL Workbench and run the SQL files in the `SQL/` folder:
 00_create_db.sql  
 01_schema.sql  
@@ -60,7 +60,7 @@ Open MySQL Workbench and run the SQL files in the `SQL/` folder:
 03_triggers.sql  
 This is to create the database with the required tables and data.
 
-b. Terminal (Harder)
+b. Terminal (Harder) -
 Create a MySQL Database, then import the schema and seed SQL files
 Example: CREATE DATABASE patient_portal;
 Then import the SQL files with either MySQL workbench or command line:
