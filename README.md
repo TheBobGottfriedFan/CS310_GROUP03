@@ -70,7 +70,7 @@ note: a .env has been provided for the testing environments.
 ### 5. Set Up MySQL Database
 a. MySQL workbench (Easier) - 
 
-Open MySQL Workbench and run the SQL files in the `SQL/` folder:
+Open MySQL Workbench and run the SQL files in the `SQL/` folder (in order):
 00_create_db.sql  
 01_schema.sql  
 02_seed.sql  
