@@ -78,10 +78,15 @@ This is to create the database with the required tables and data.
 b. Terminal (Harder) -
 
 Create a MySQL Database, then import the schema and seed SQL files
+
 Example: CREATE DATABASE patient_portal;
+
 Then import the SQL files with either MySQL workbench or command line:
+
 mysql -u your_mysql_user -p patient_portal < schema.sql
+
 mysql -u your_mysql_user -p patient_portal < seed.sql
+
 note: the "your_mysql_user" is the user you had created in MySQL.
 
 ### 6. Run Django Migrations (SQLite fallback)
