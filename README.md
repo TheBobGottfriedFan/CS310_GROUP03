@@ -83,12 +83,14 @@ python manage.py runserver
 
 ### 8. Access the Application
 In your webbrowser, open up:
+
 Signup: http://127.0.0.1:8000/signup/
 Login: http://127.0.0.1:8000/login/
 note: this is not a https environment, this is a http testing environment. The developers of this application are unpaid.
 
 ### 9. Signup/Login
 Now, you can either:
+
 a. Login via a seeded user in the seeded SQL files
 b. create a new patient account in the sign-up page
 
