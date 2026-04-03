@@ -1,0 +1,20 @@
+{% extends "portal/base.html" %}
+{% block title %}Medical History | Patient Portal{% endblock %}
+{% block content %}
+<div style="max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:18px;">
+  <div style="background:linear-gradient(135deg,var(--teal-600),var(--teal-700)); color:white; border-radius:24px; padding:26px 28px;">
+    <h1 style="margin:0 0 6px; font-size:1.6rem; font-weight:900;">Medical History</h1>
+    <p style="margin:0; opacity:0.92;">Review and update your medical history.</p>
+  </div>
+  <div style="background:white; border-radius:24px; border:1.5px solid var(--border); padding:24px;">
+    <form method="POST" style="display:flex; flex-direction:column; gap:14px;">
+      {% csrf_token %}
+      <label style="font-weight:800; font-size:0.84rem; color:var(--gray-700);">History Details</label>
+      <textarea name="history_data" rows="10" placeholder="Enter your medical history here..." style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px; font:inherit; resize:vertical;">{{ medical_history.history_data|default:'' }}</textarea>
+      <div style="display:flex; justify-content:flex-end;">
+        <button class="btn btn-sm" type="submit">Save Medical History</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
