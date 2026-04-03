@@ -28,6 +28,11 @@ urlpatterns = [
     path("accessibility/", views.accessibility_view, name="accessibility"),
     path("maintenance-notices/", views.maintenance_notices_view, name="maintenance_notices"),
     path("notification-preferences/", views.notification_preferences_view, name="notification_preferences"),
+    path("medical-history/", views.medical_history_view, name="medical_history"),
+    path("allergies/", views.allergies_view, name="allergies"),
+    path("allergies/<int:allergy_id>/delete/", views.delete_allergy_view, name="delete_allergy"),
+    path("prescriptions/", views.prescriptions_view, name="prescriptions"),
+    path("prescriptions/<int:prescription_id>/delete/", views.delete_prescription_view, name="delete_prescription"),
     path(
         "appointments/<int:appointment_id>/follow-up/",
         views.schedule_follow_up_appointment_view,
