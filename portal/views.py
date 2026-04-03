@@ -165,6 +165,28 @@ def signup_view(request):
     messages.success(request, "Account created successfully. Please log in.")
     return redirect("portal:login")
 
+def _get_role_name(role_id: int) -> str:
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT name
+            FROM roles
+            WHERE id = %s
+            LIMIT 1
+            """,
+            (role_id,),
+        )
+        row = cur.fetchone()
+        if not row or not row.get("name"):
+            return "Member"
+        return str(row["name"]).strip().title()
+    finally:
+        if conn:
+            conn.close()
+
 @require_http_methods(["GET", "POST"])
 def login_view(request):
     if request.method == "GET":
@@ -198,6 +220,7 @@ def login_view(request):
         )
     request.session["user_id"] = int(sql_user_id)
     request.session["role_id"] = int(sql_role_id)
+    request.session["role_name"] = _get_role_name(int(sql_role_id))
     request.session["email"] = getattr(user, "email", "") or user.get_username()
     request.session["display_name"] = (user.get_full_name() or user.get_username()).strip()
     request.session["sql_user_id"] = int(sql_user_id)
