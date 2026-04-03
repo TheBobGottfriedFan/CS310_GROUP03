@@ -1316,3 +1316,328 @@ def notification_preferences_view(request):
             },
         },
     )
+
+
+@require_login
+@require_http_methods(["GET", "POST"])
+def medical_history_view(request):
+    user_id = int(request.session["user_id"])
+    username = request.session.get("display_name") or request.session.get("email")
+    if request.method == "POST":
+        history_data = (request.POST.get("history_data") or "").strip()
+        conn = None
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute(
+                """
+                INSERT INTO medical_history (patient_id, updated_by, history_data)
+                VALUES (%s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                    updated_by = VALUES(updated_by),
+                    history_data = VALUES(history_data)
+                """,
+                (user_id, user_id, history_data or None),
+            )
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
+        return redirect("portal:medical_history")
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT id, patient_id, updated_by, history_data, updated_at
+            FROM medical_history
+            WHERE patient_id = %s
+            LIMIT 1
+            """,
+            (user_id,),
+        )
+        history = cur.fetchone()
+    finally:
+        if conn:
+            conn.close()
+    return render(
+        request,
+        "portal/medical_history.html",
+        {
+            "username": username,
+            "medical_history": history,
+        },
+    )
+
+
+@require_login
+@require_http_methods(["GET", "POST"])
+def allergies_view(request):
+    user_id = int(request.session["user_id"])
+    username = request.session.get("display_name") or request.session.get("email")
+    if request.method == "POST":
+        allergy_id_raw = (request.POST.get("allergy_id") or "").strip()
+        substance = (request.POST.get("substance") or "").strip()
+        reaction = (request.POST.get("reaction") or "").strip() or None
+        severity = (request.POST.get("severity") or "").strip() or None
+        notes = (request.POST.get("notes") or "").strip() or None
+        if not substance:
+            return render(
+                request,
+                "portal/allergies.html",
+                {
+                    "username": username,
+                    "allergies": _list_patient_allergies(user_id),
+                    "error": "Substance is required.",
+                },
+            )
+        conn = None
+        try:
+            conn = get_connection()
+            cur = conn.cursor(dictionary=True)
+            if allergy_id_raw:
+                try:
+                    allergy_id = int(allergy_id_raw)
+                except ValueError:
+                    allergy_id = 0
+                cur.execute(
+                    """
+                    SELECT id
+                    FROM allergies
+                    WHERE id = %s AND patient_id = %s
+                    LIMIT 1
+                    """,
+                    (allergy_id, user_id),
+                )
+                existing = cur.fetchone()
+                if existing:
+                    cur = conn.cursor()
+                    cur.execute(
+                        """
+                        UPDATE allergies
+                        SET substance = %s,
+                            reaction = %s,
+                            severity = %s,
+                            notes = %s
+                        WHERE id = %s AND patient_id = %s
+                        """,
+                        (substance, reaction, severity, notes, allergy_id, user_id),
+                    )
+                else:
+                    cur = conn.cursor()
+                    cur.execute(
+                        """
+                        INSERT INTO allergies (patient_id, substance, reaction, severity, notes)
+                        VALUES (%s, %s, %s, %s, %s)
+                        """,
+                        (user_id, substance, reaction, severity, notes),
+                    )
+            else:
+                cur = conn.cursor()
+                cur.execute(
+                    """
+                    INSERT INTO allergies (patient_id, substance, reaction, severity, notes)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (user_id, substance, reaction, severity, notes),
+                )
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
+
+        return redirect("portal:allergies")
+    return render(
+        request,
+        "portal/allergies.html",
+        {
+            "username": username,
+            "allergies": _list_patient_allergies(user_id),
+        },
+    )
+
+
+@require_login
+@require_http_methods(["POST"])
+def delete_allergy_view(request, allergy_id: int):
+    user_id = int(request.session["user_id"])
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            DELETE FROM allergies
+            WHERE id = %s AND patient_id = %s
+            """,
+            (allergy_id, user_id),
+        )
+        conn.commit()
+    finally:
+        if conn:
+            conn.close()
+    return redirect("portal:allergies")
+
+
+def _list_patient_allergies(user_id: int):
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT id, substance, reaction, severity, notes, recorded_at
+            FROM allergies
+            WHERE patient_id = %s
+            ORDER BY recorded_at DESC, id DESC
+            """,
+            (user_id,),
+        )
+        return cur.fetchall()
+    finally:
+        if conn:
+            conn.close()
+
+
+@require_login
+@require_http_methods(["GET", "POST"])
+def prescriptions_view(request):
+    user_id = int(request.session["user_id"])
+    username = request.session.get("display_name") or request.session.get("email")
+    if request.method == "POST":
+        prescription_id_raw = (request.POST.get("prescription_id") or "").strip()
+        medication_name = (request.POST.get("medication_name") or "").strip()
+        dosage = (request.POST.get("dosage") or "").strip() or None
+        frequency = (request.POST.get("frequency") or "").strip() or None
+        start_date = (request.POST.get("start_date") or "").strip() or None
+        end_date = (request.POST.get("end_date") or "").strip() or None
+        if not medication_name:
+            return render(
+                request,
+                "portal/prescriptions.html",
+                {
+                    "username": username,
+                    "prescriptions": _list_patient_prescriptions(user_id),
+                    "error": "Medication name is required.",
+                },
+            )
+        conn = None
+        try:
+            conn = get_connection()
+            cur = conn.cursor(dictionary=True)
+            if prescription_id_raw:
+                try:
+                    prescription_id = int(prescription_id_raw)
+                except ValueError:
+                    prescription_id = 0
+
+                cur.execute(
+                    """
+                    SELECT id
+                    FROM prescriptions
+                    WHERE id = %s AND patient_id = %s
+                    LIMIT 1
+                    """,
+                    (prescription_id, user_id),
+                )
+                existing = cur.fetchone()
+                if existing:
+                    cur = conn.cursor()
+                    cur.execute(
+                        """
+                        UPDATE prescriptions
+                        SET medication_name = %s,
+                            dosage = %s,
+                            frequency = %s,
+                            start_date = %s,
+                            end_date = %s
+                        WHERE id = %s AND patient_id = %s
+                        """,
+                        (
+                            medication_name,
+                            dosage,
+                            frequency,
+                            start_date,
+                            end_date,
+                            prescription_id,
+                            user_id,
+                        ),
+                    )
+                else:
+                    cur = conn.cursor()
+                    cur.execute(
+                        """
+                        INSERT INTO prescriptions (
+                            patient_id, medication_name, dosage, frequency, start_date, end_date
+                        )
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                        """,
+                        (user_id, medication_name, dosage, frequency, start_date, end_date),
+                    )
+            else:
+                cur = conn.cursor()
+                cur.execute(
+                    """
+                    INSERT INTO prescriptions (
+                        patient_id, medication_name, dosage, frequency, start_date, end_date
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    """,
+                    (user_id, medication_name, dosage, frequency, start_date, end_date),
+                )
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
+        return redirect("portal:prescriptions")
+    return render(
+        request,
+        "portal/prescriptions.html",
+        {
+            "username": username,
+            "prescriptions": _list_patient_prescriptions(user_id),
+        },
+    )
+
+
+@require_login
+@require_http_methods(["POST"])
+def delete_prescription_view(request, prescription_id: int):
+    user_id = int(request.session["user_id"])
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """
+            DELETE FROM prescriptions
+            WHERE id = %s AND patient_id = %s
+            """,
+            (prescription_id, user_id),
+        )
+        conn.commit()
+    finally:
+        if conn:
+            conn.close()
+    return redirect("portal:prescriptions")
+
+
+def _list_patient_prescriptions(user_id: int):
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT id, medication_name, dosage, frequency, start_date, end_date
+            FROM prescriptions
+            WHERE patient_id = %s
+            ORDER BY id DESC
+            """,
+            (user_id,),
+        )
+        return cur.fetchall()
+    finally:
+        if conn:
+            conn.close()
