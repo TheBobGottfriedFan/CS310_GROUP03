@@ -22,10 +22,7 @@
     <div style="padding:20px 24px; border-right:1px solid var(--border);">
       <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); margin:0 0 6px; font-family:var(--font);">Role</p>
       <p style="font-size:1.4rem; font-weight:900; color:var(--teal-600); font-family:var(--font); letter-spacing:-0.03em; line-height:1.2; margin:0;">
-        {% if request.session.role_id == 1 %}Patient
-        {% elif request.session.role_id == 2 %}Provider
-        {% elif request.session.role_id == 3 %}Admin
-        {% else %}Member{% endif %}
+        {{ request.session.role_name|default:"Member" }}
       </p>
     </div>
     <div style="padding:20px 24px;">
@@ -47,10 +44,7 @@
           <div style="display:flex; gap:7px;">
             <span class="badge badge-green">● Active</span>
             <span class="badge badge-teal">
-              {% if request.session.role_id == 1 %}Patient
-              {% elif request.session.role_id == 2 %}Provider
-              {% elif request.session.role_id == 3 %}Admin
-              {% else %}Member{% endif %}
+              {{ request.session.role_name|default:"Member" }}
             </span>
           </div>
         </div>
@@ -69,10 +63,7 @@
         <div style="display:grid; grid-template-columns:130px 1fr; padding:11px 0; border-bottom:1px solid var(--gray-100);">
           <span style="font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; font-family:var(--font);">Role</span>
           <span style="font-family:var(--font); font-weight:600; color:var(--gray-800); font-size:0.92rem;">
-            {% if request.session.role_id == 1 %}Patient
-            {% elif request.session.role_id == 2 %}Provider
-            {% elif request.session.role_id == 3 %}Admin
-            {% else %}Member{% endif %}
+            {{ request.session.role_name|default:"Member" }}
           </span>
         </div>
         <div style="display:grid; grid-template-columns:130px 1fr; padding:11px 0;">
