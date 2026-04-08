@@ -1571,7 +1571,6 @@ def _list_patient_allergies(user_id: int):
         if conn:
             conn.close()
 
-
 @require_login
 @require_http_methods(["GET", "POST"])
 def prescriptions_view(request):
@@ -1591,6 +1590,7 @@ def prescriptions_view(request):
                 {
                     "username": username,
                     "prescriptions": _list_patient_prescriptions(user_id),
+                    "search_query": "",
                     "error": "Medication name is required.",
                 },
             )
@@ -1603,7 +1603,6 @@ def prescriptions_view(request):
                     prescription_id = int(prescription_id_raw)
                 except ValueError:
                     prescription_id = 0
-
                 cur.execute(
                     """
                     SELECT id
@@ -1663,12 +1662,44 @@ def prescriptions_view(request):
             if conn:
                 conn.close()
         return redirect("portal:prescriptions")
+    search_query = (request.GET.get("q") or "").strip()
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        if search_query:
+            cur.execute(
+                """
+                SELECT id, medication_name, dosage, frequency, start_date, end_date
+                FROM prescriptions
+                WHERE patient_id = %s
+                  AND (
+                    medication_name LIKE %s OR
+                    dosage LIKE %s OR
+                    frequency LIKE %s
+                  )
+                ORDER BY id DESC
+                """,
+                (
+                    user_id,
+                    f"%{search_query}%",
+                    f"%{search_query}%",
+                    f"%{search_query}%",
+                ),
+            )
+            prescriptions = cur.fetchall()
+        else:
+            prescriptions = _list_patient_prescriptions(user_id)
+    finally:
+        if conn:
+            conn.close()
     return render(
         request,
         "portal/prescriptions.html",
         {
             "username": username,
-            "prescriptions": _list_patient_prescriptions(user_id),
+            "prescriptions": prescriptions,
+            "search_query": search_query,
         },
     )
 
