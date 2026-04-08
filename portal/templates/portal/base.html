@@ -43,6 +43,15 @@
       <a class="nav-link {% if request.path == '/health-info/' %}active{% endif %}" href="{% url 'portal:health_info' %}">
         <span class="nav-icon">🩹</span> Health Info
       </a>
+      <a class="nav-link {% if request.path == '/medical-history/' %}active{% endif %}" href="{% url 'portal:medical_history' %}">
+        <span class="nav-icon">📋</span> MEDICAL HISTORY
+      </a>
+      <a class="nav-link {% if request.path == '/allergies/' %}active{% endif %}" href="{% url 'portal:allergies' %}">
+        <span class="nav-icon">🌿</span> Allergies
+      </a>
+      <a class="nav-link {% if request.path == '/prescriptions/' %}active{% endif %}" href="{% url 'portal:prescriptions' %}">
+        <span class="nav-icon">💊</span> PRESCRIPTIONS 
+      </a>
       <a class="nav-link {% if request.path == '/contact-info/' %}active{% endif %}" href="{% url 'portal:contact_info' %}">
         <span class="nav-icon">📞</span> Contact Info
       </a>

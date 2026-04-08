@@ -22,25 +22,25 @@
       <form method="POST" style="display:flex; flex-direction:column; gap:14px;">
         {% csrf_token %}
         <div>
-          <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem; color:var(--gray-700);">Question</label>
+          <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem; color:var(--gray-700);">QUESTION</label>
           <select name="question_id" required style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px; font:inherit;">
-            <option value="">Select a question</option>
+            <option value="">SELECT question</option>
             {% for q in questions %}
               <option value="{{ q.id }}">{{ q.question_text }}</option>
             {% endfor %}
           </select>
         </div>
         <div>
-          <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem; color:var(--gray-700);">Answer</label>
+          <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem; color:var(--gray-700);">ANSWER HERE</label>
           <input type="text" name="answer" placeholder="Enter your answer" required style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px; font:inherit;">
         </div>
         <div style="display:flex; justify-content:flex-end;">
-          <button class="btn btn-sm" type="submit">Save Question</button>
+          <button class="btn btn-sm" type="submit">QUESTION SAVES</button>
         </div>
       </form>
     </div>
     <div style="background:white; border-radius:24px; border:1.5px solid var(--border); box-shadow:0 4px 24px rgba(15,23,42,0.06); padding:24px;">
-      <h2 style="margin:0 0 14px; font-size:1.05rem; font-weight:900;">Saved Questions</h2>
+      <h2 style="margin:0 0 14px; font-size:1.05rem; font-weight:900;">QUESTIONS SAVED</h2>
       {% if saved_questions %}
         <div style="display:flex; flex-direction:column; gap:10px;">
           {% for item in saved_questions %}
@@ -51,7 +51,7 @@
         </div>
       {% else %}
         <div style="padding:18px; border:1px dashed var(--border); border-radius:14px; color:var(--text-muted); text-align:center;">
-          No security questions saved.
+          DO YOU WANT ANY SECURITY QUESTIONS SAVED?
         </div>
       {% endif %}
     </div>

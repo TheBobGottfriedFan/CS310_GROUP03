@@ -1,0 +1,101 @@
+{% extends "portal/base.html" %}
+{% block title %}Prescriptions | Patient Portal{% endblock %}
+{% block content %}
+<div style="max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:18px;">
+  <div style="background:linear-gradient(135deg,var(--teal-600),var(--teal-700)); color:white; border-radius:24px; padding:26px 28px;">
+    <h1 style="margin:0 0 6px; font-size:1.6rem; font-weight:900;">PRESCRIPTION</h1>
+    <p style="margin:0; opacity:0.92;">PRESCRIPTION INFORMATION</p>
+  </div>
+  <form method="GET" action="{% url 'portal:prescriptions' %}" style="margin-bottom:18px; display:flex; gap:10px;">
+    <input
+      type="text"
+      name="q"
+      value="{{ search_query|default:'' }}"
+      placeholder="Search prescriptions..."
+      style="flex:1; padding:12px 14px; border:1px solid var(--border); border-radius:12px;"
+    >
+    <button class="btn btn-secondary btn-sm" type="submit">Search</button>
+  </form>
+  {% if error %}
+    <div style="padding:14px 16px; border-radius:14px; border:1px solid var(--border); background:rgba(239,68,68,0.10); color:var(--gray-800);">
+      {{ error }}
+    </div>
+  {% endif %}
+  <div style="background:white; border-radius:24px; border:1.5px solid var(--border); padding:24px;">
+    <form method="POST" style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px;">
+      {% csrf_token %}
+      <input type="hidden" name="prescription_id" id="prescription_id">
+      <div style="grid-column:1 / -1;">
+        <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem;">MEDICATION LABELS</label>
+        <input type="text" name="medication_name" id="medication_name" required style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px;">
+      </div>
+      <div>
+        <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem;">DOSAGE METER</label>
+        <input type="text" name="dosage" id="dosage" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px;">
+      </div>
+      <div>
+        <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem;">FREQUENCY</label>
+        <input type="text" name="frequency" id="frequency" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px;">
+      </div>
+      <div>
+        <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem;">DATE START</label>
+        <input type="date" name="start_date" id="start_date" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px;">
+      </div>
+      <div>
+        <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem;">DATE END</label>
+        <input type="date" name="end_date" id="end_date" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px;">
+      </div>
+      <div style="grid-column:1 / -1; display:flex; justify-content:flex-end;">
+        <button class="btn btn-sm" type="submit">Save Prescription</button>
+      </div>
+    </form>
+  </div>
+  <div style="background:white; border-radius:24px; border:1.5px solid var(--border); padding:24px;">
+    <h2 style="margin:0 0 14px; font-size:1.05rem; font-weight:900;">SAVED PRESCRIPTION</h2>
+    {% if prescriptions %}
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        {% for rx in prescriptions %}
+          <div style="padding:16px 18px; border:1px solid var(--border); border-radius:16px;">
+            <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+              <div>
+                <div style="font-weight:900; color:var(--gray-900);">{{ rx.medication_name }}</div>
+                <div style="font-size:0.9rem; color:var(--gray-700);">DOSAGE METER: {{ rx.dosage|default:"N/A" }}</div>
+                <div style="font-size:0.9rem; color:var(--gray-700);">FREQUENCY METER: {{ rx.frequency|default:"N/A" }}</div>
+                <div style="font-size:0.9rem; color:var(--gray-700);">Dates: {{ rx.start_date|default:"N/A" }} - {{ rx.end_date|default:"N/A" }}</div>
+              </div>
+              <div style="display:flex; gap:8px; align-items:start;">
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  onclick="fillPrescriptionForm('{{ rx.id }}','{{ rx.medication_name|escapejs }}','{{ rx.dosage|default:''|escapejs }}','{{ rx.frequency|default:''|escapejs }}','{{ rx.start_date|default:'' }}','{{ rx.end_date|default:'' }}')"
+                >
+                  The Editor
+                </button>
+                <form method="POST" action="{% url 'portal:delete_prescription' rx.id %}">
+                  {% csrf_token %}
+                  <button class="btn btn-sm" type="submit">Delete</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="padding:18px; border:1px dashed var(--border); border-radius:14px; color:var(--text-muted); text-align:center;">
+        No Meds, Schizo?
+      </div>
+    {% endif %}
+  </div>
+</div>
+<script>
+function fillPrescriptionForm(id, medication_name, dosage, frequency, start_date, end_date) {
+  document.getElementById("prescription_id").value = id;
+  document.getElementById("medication_name").value = medication_name;
+  document.getElementById("dosage").value = dosage;
+  document.getElementById("frequency").value = frequency;
+  document.getElementById("start_date").value = start_date;
+  document.getElementById("end_date").value = end_date;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+</script>
+{% endblock %}

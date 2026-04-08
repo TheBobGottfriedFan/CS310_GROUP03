@@ -1,0 +1,93 @@
+{% extends "portal/base.html" %}
+{% block title %}Allergies | Patient Portal{% endblock %}
+{% block content %}
+<div style="max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:18px;">
+  <div style="background:linear-gradient(135deg,var(--teal-600),var(--teal-700)); color:white; border-radius:24px; padding:26px 28px;">
+    <h1 style="margin:0 0 6px; font-size:1.6rem; font-weight:900;">ALLERGIES.</h1>
+    <p style="margin:0; opacity:0.92;">UPDATE ALLERGIES.</p>
+  </div>
+  {% if error %}
+    <div style="padding:14px 16px; border-radius:14px; border:1px solid var(--border); background:rgba(239,68,68,0.10); color:var(--gray-800);">
+      {{ error }}
+    </div>
+  {% endif %}
+  <div style="background:white; border-radius:24px; border:1.5px solid var(--border); padding:24px;">
+    <form method="POST" style="display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px;">
+      {% csrf_token %}
+      <input type="hidden" name="allergy_id" id="allergy_id">
+      <div>
+        <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem;">Substance</label>
+        <input type="text" name="substance" id="substance" required style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px;">
+      </div>
+      <div>
+        <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem;">Reaction</label>
+        <input type="text" name="reaction" id="reaction" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px;">
+      </div>
+      <div>
+        <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem;">Severity</label>
+        <select name="severity" id="severity" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px;">
+          <option value="">SEVERITY OPTIONS</option>
+          <option value="mild">MILD</option>
+          <option value="moderate">Moderate</option>
+          <option value="severe">severe</option>
+        </select>
+      </div>
+      <div style="grid-column:1 / -1;">
+        <label style="display:block; margin-bottom:7px; font-weight:800; font-size:0.84rem;">NOTED</label>
+        <textarea name="notes" id="notes" rows="4" style="width:100%; padding:12px 14px; border:1px solid var(--border); border-radius:14px;"></textarea>
+      </div>
+      <div style="grid-column:1 / -1; display:flex; justify-content:flex-end;">
+        <button class="btn btn-sm" type="submit">SAVE YOUR ALLERGIES</button>
+      </div>
+    </form>
+  </div>
+  <div style="background:white; border-radius:24px; border:1.5px solid var(--border); padding:24px;">
+    <h2 style="margin:0 0 14px; font-size:1.05rem; font-weight:900;">SAVED ALLERGIES</h2>
+    {% if allergies %}
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        {% for allergy in allergies %}
+          <div style="padding:16px 18px; border:1px solid var(--border); border-radius:16px;">
+            <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+              <div>
+                <div style="font-weight:900; color:var(--gray-900);">{{ allergy.substance }}</div>
+                <div style="font-size:0.9rem; color:var(--gray-700);">REACTION: {{ allergy.reaction|default:"N/A" }}</div>
+                <div style="font-size:0.9rem; color:var(--gray-700);">SEVERITY: {{ allergy.severity|default:"N/A" }}</div>
+                {% if allergy.notes %}
+                  <div style="font-size:0.9rem; color:var(--gray-700); margin-top:6px;">{{ allergy.notes }}</div>
+                {% endif %}
+              </div>
+              <div style="display:flex; gap:8px; align-items:start;">
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  onclick="fillAllergyForm('{{ allergy.id }}','{{ allergy.substance|escapejs }}','{{ allergy.reaction|default:''|escapejs }}','{{ allergy.severity|default:''|escapejs }}','{{ allergy.notes|default:''|escapejs }}')"
+                >
+                  Edit
+                </button>
+                <form method="POST" action="{% url 'portal:delete_allergy' allergy.id %}">
+                  {% csrf_token %}
+                  <button class="btn btn-sm" type="submit">Delete</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="padding:18px; border:1px dashed var(--border); border-radius:14px; color:var(--text-muted); text-align:center;">
+        Do you see this? You are nothing without a weakness.
+      </div>
+    {% endif %}
+  </div>
+</div>
+<script>
+function fillAllergyForm(id, substance, reaction, severity, notes) {
+  document.getElementById("allergy_id").value = id;
+  document.getElementById("substance").value = substance;
+  document.getElementById("reaction").value = reaction;
+  document.getElementById("severity").value = severity;
+  document.getElementById("notes").value = notes;
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+</script>
+{% endblock %}

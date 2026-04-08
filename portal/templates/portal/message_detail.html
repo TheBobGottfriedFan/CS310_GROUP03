@@ -1,0 +1,14 @@
+{% extends "portal/base.html" %}
+{% block title %}Message Detail | Patient Portal{% endblock %}
+{% block content %}
+<div style="max-width:900px; margin:0 auto; background:white; border-radius:24px; border:1.5px solid var(--border); padding:24px;">
+  <h1 style="margin:0 0 14px;">Message Detail</h1>
+  <div style="padding:16px; border:1px solid var(--border); border-radius:16px;">
+    <p><strong>Subject:</strong> {{ message.subject|default:"Portal Message" }}</p>
+    <p><strong>Sent:</strong> {{ message.sent_at }}</p>
+    <p><strong>Status:</strong> {% if message.is_read %}Read{% else %}Unread{% endif %}</p>
+    <hr style="margin:14px 0;">
+    <p style="white-space:pre-wrap;">{{ message.body }}</p>
+  </div>
+</div>
+{% endblock %}

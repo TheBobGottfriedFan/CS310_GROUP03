@@ -1,0 +1,17 @@
+{% extends "portal/base.html" %}
+{% block title %}Billing Information | Patient Portal{% endblock %}
+{% block content %}
+<div style="max-width:900px; margin:0 auto; background:white; border-radius:24px; border:1.5px solid var(--border); padding:24px;">
+  <h1 style="margin:0 0 14px;">Billing Information</h1>
+  <p style="margin:0 0 12px;">Informational only.</p>
+  {% if billing_items %}
+    {% for item in billing_items %}
+      <div>{{ item }}</div>
+    {% endfor %}
+  {% else %}
+    <div style="padding:18px; border:1px dashed var(--border); border-radius:12px; color:var(--text-muted);">
+      No billing records.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
