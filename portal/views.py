@@ -529,11 +529,13 @@ def request_appointment_view(request):
     reason = (request.POST.get("reason") or "").strip()
     appointment_type = (request.POST.get("appointment_type") or "new").strip()
     if not slot_id_raw:
-        return JsonResponse({"ok": False, "error": "slot_id is required."}, status=400)
+        messages.error(request, "SLOT ID REQUIRED.")
+        return redirect("portal:appointments_filtered")
     try:
         slot_id = int(slot_id_raw)
     except ValueError:
-        return JsonResponse({"ok": False, "error": "slot_id must be an integer."}, status=400)
+        messages.error(request, "Slot ID VALID NUMBER MUST BE.")
+        return redirect("portal:appointments_filtered")
     if appointment_type not in {"new", "follow_up", "visit"}:
         appointment_type = "new"
     conn = None
@@ -551,9 +553,11 @@ def request_appointment_view(request):
         )
         slot = cur.fetchone()
         if not slot:
-            return JsonResponse({"ok": False, "error": "Slot not found."}, status=404)
+            messages.error(request, "SELECTED SLOT NOT FOUND.")
+            return redirect("portal:appointments_filtered")
         if slot["status"] != "open":
-            return JsonResponse({"ok": False, "error": "Slot is not available."}, status=400)
+            messages.error(request, "SLOT NOT AVAILABLE ANYMORE.")
+            return redirect("portal:appointments_filtered")
         cur = conn.cursor()
         cur.execute(
             """
@@ -587,21 +591,14 @@ def request_appointment_view(request):
             INSERT INTO notifications (user_id, category, message)
             VALUES (%s, 'appointment', %s)
             """,
-            (int(slot["provider_id"]), f"Appointment #{appointment_id} has been scheduled."),
+            (int(slot["provider_id"]), f"APPOINTMENT ID: #{appointment_id} SCHEDULED."),
         )
         conn.commit()
     finally:
         if conn:
             conn.close()
-    return JsonResponse(
-        {
-            "ok": True,
-            "permission": REQUEST_APPOINTMENT,
-            "appointment_id": appointment_id,
-            "slot_id": slot_id,
-            "status": "scheduled",
-        }
-    )
+    messages.success(request, "APPOINTMENT SUCCESSFULLY SCHEDULED, KINDLY SEND 1 LAKH.")
+    return redirect("portal:appointment_detail", appointment_id=appointment_id)
 
 @require_permission(CANCEL_APPOINTMENT)
 @require_http_methods(["POST"])
