@@ -32,7 +32,7 @@
     </div>
   </div>
 
-
+  <!-- Top stat cards -->
   <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:0; border-bottom:1px solid var(--border);">
 
     <!-- Appointment — teal gradient -->
@@ -45,35 +45,32 @@
       <div style="position:absolute;right:-12px;top:-12px;font-size:5.5rem;opacity:0.10;">📅</div>
       <p style="font-size:0.7rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,0.65);margin:0 0 10px;font-family:var(--font);">Next Appointment</p>
       {% if appointments and appointments|length > 0 %}
-        <p style="font-size:1.45rem;font-weight:900;color:white;font-family:var(--font);letter-spacing:-0.03em;margin:0 0 3px;">{{ appointments.0.date }}</p>
-        <p style="font-size:0.83rem;color:rgba(255,255,255,0.7);margin:0 0 16px;">{{ appointments.0.provider }}</p>
+        <p style="font-size:1.45rem;font-weight:900;color:white;font-family:var(--font);letter-spacing:-0.03em;margin:0 0 3px;">{{ appointments.0.1|date:"M d" }}</p>
+        <p style="font-size:0.83rem;color:rgba(255,255,255,0.7);margin:0 0 16px;">Dr. {{ appointments.0.5 }} {{ appointments.0.6 }}</p>
+        <a href="{% url 'portal:appointment_detail' appointments.0.0 %}" style="display:inline-flex;align-items:center;gap:5px;padding:6px 13px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:8px;font-size:0.78rem;font-weight:700;color:white;text-decoration:none;font-family:var(--font);">View →</a>
       {% else %}
         <p style="font-size:1.45rem;font-weight:900;color:white;font-family:var(--font);letter-spacing:-0.03em;margin:0 0 3px;">None Yet</p>
         <p style="font-size:0.83rem;color:rgba(255,255,255,0.65);margin:0 0 16px;">Tap to schedule</p>
-      {% endif %}
-      {% if appointments and appointments|length > 0 %}
-        <a href="{% url 'portal:appointment_detail' appointments.0.id %}" style="display:inline-flex;align-items:center;gap:5px;padding:6px 13px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:8px;font-size:0.78rem;font-weight:700;color:white;text-decoration:none;font-family:var(--font);">View →</a>
-      {% else %}
         <a href="{% url 'portal:appointments_filtered' %}" style="display:inline-flex;align-items:center;gap:5px;padding:6px 13px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:8px;font-size:0.78rem;font-weight:700;color:white;text-decoration:none;font-family:var(--font);">Browse →</a>
-      {% endif %} 
+      {% endif %}
     </div>
 
     <!-- Messages -->
     <div style="padding:24px 22px; border-right:1px solid var(--border); position:relative; overflow:hidden; background:white;">
       <div style="position:absolute;right:-10px;top:-10px;font-size:5.5rem;opacity:0.05;">💬</div>
       <p style="font-size:0.7rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-muted);margin:0 0 10px;font-family:var(--font);">Messages</p>
-      <p style="font-size:3.2rem;font-weight:900;color:var(--gray-900);font-family:var(--font);letter-spacing:-0.05em;line-height:1;margin:0 0 3px;">{% if portal_messages %}{{ portal_messages|length }}{% else %}2{% endif %}</p>
+      <p style="font-size:3.2rem;font-weight:900;color:var(--gray-900);font-family:var(--font);letter-spacing:-0.05em;line-height:1;margin:0 0 3px;">{% if portal_messages %}{{ portal_messages|length }}{% else %}0{% endif %}</p>
       <p style="font-size:0.83rem;color:var(--text-soft);margin:0 0 16px;">Unread in inbox</p>
       <a href="{% url 'portal:messages' %}" style="display:inline-flex;align-items:center;gap:5px;padding:6px 13px;background:var(--teal-50);border:1px solid var(--teal-200);border-radius:8px;font-size:0.78rem;font-weight:700;color:var(--teal-700);text-decoration:none;font-family:var(--font);">Open Inbox →</a>
     </div>
 
-    <!-- Security -->
+    <!-- Prescriptions -->
     <div style="padding:24px 22px; border-right:1px solid var(--border); position:relative; overflow:hidden; background:white;">
-      <div style="position:absolute;right:-10px;top:-10px;font-size:5.5rem;opacity:0.05;">🔒</div>
-      <p style="font-size:0.7rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-muted);margin:0 0 10px;font-family:var(--font);">Security</p>
-      <p style="font-size:1.6rem;font-weight:900;color:var(--gray-900);font-family:var(--font);letter-spacing:-0.03em;margin:0 0 3px;">Active</p>
-      <p style="font-size:0.83rem;color:var(--text-soft);margin:0 0 16px;">bcrypt + CSRF</p>
-      <a href="{% url 'portal:settings' %}" style="display:inline-flex;align-items:center;gap:5px;padding:6px 13px;background:var(--gray-100);border:1px solid var(--border);border-radius:8px;font-size:0.78rem;font-weight:700;color:var(--gray-700);text-decoration:none;font-family:var(--font);">Settings →</a>
+      <div style="position:absolute;right:-10px;top:-10px;font-size:5.5rem;opacity:0.05;">💊</div>
+      <p style="font-size:0.7rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:var(--text-muted);margin:0 0 10px;font-family:var(--font);">Prescriptions</p>
+      <p style="font-size:3.2rem;font-weight:900;color:var(--gray-900);font-family:var(--font);letter-spacing:-0.05em;line-height:1;margin:0 0 3px;">{{ prescription_count|default:"0" }}</p>
+      <p style="font-size:0.83rem;color:var(--text-soft);margin:0 0 16px;">Active on file</p>
+      <a href="{% url 'portal:prescriptions' %}" style="display:inline-flex;align-items:center;gap:5px;padding:6px 13px;background:var(--teal-50);border:1px solid var(--teal-200);border-radius:8px;font-size:0.78rem;font-weight:700;color:var(--teal-700);text-decoration:none;font-family:var(--font);">View All →</a>
     </div>
 
     <!-- Account -->
@@ -87,20 +84,20 @@
 
   </div>
 
-  <!-- Bottom section: 3 columns -->
-  <div style="display:grid; grid-template-columns:1.8fr 1fr 1fr; gap:0;">
+  <!-- Middle section: Upcoming + Quick Links + System Status -->
+  <div style="display:grid; grid-template-columns:1.8fr 1fr 1fr; gap:0; border-bottom:1px solid var(--border);">
 
     <!-- Upcoming appointment -->
     <div style="padding:24px; border-right:1px solid var(--border);">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
         <h3 style="font-family:var(--font); font-size:0.92rem; font-weight:800; color:var(--gray-800); margin:0; display:flex; align-items:center; gap:7px;">📅 Upcoming Appointment</h3>
-        <a class="btn btn-secondary btn-sm" style="font-size:0.78rem; padding:6px 12px;" href="{% url 'portal:appointments_filtered' %}">Schedule</a>      
+        <a class="btn btn-secondary btn-sm" style="font-size:0.78rem; padding:6px 12px;" href="{% url 'portal:appointments_filtered' %}">Schedule</a>
       </div>
       {% if appointments and appointments|length > 0 %}
         <div style="background:var(--teal-50); border:1px solid var(--teal-200); border-radius:12px; padding:16px;">
-          <p style="font-family:var(--font); font-weight:800; font-size:1rem; color:var(--gray-900); margin:0 0 8px;">{{ appointments.0.date }} — {{ appointments.0.time }}</p>
-          <p class="muted" style="font-size:0.85rem; margin:3px 0;">🩺 {{ appointments.0.provider }}</p>
-          <p class="muted" style="font-size:0.85rem; margin:3px 0;">📍 {{ appointments.0.location }}</p>
+          <p style="font-family:var(--font); font-weight:800; font-size:1rem; color:var(--gray-900); margin:0 0 8px;">{{ appointments.0.1|date:"N j, Y" }} — {{ appointments.0.1|date:"g:i A" }}</p>
+          <p class="muted" style="font-size:0.85rem; margin:3px 0;">🩺 Dr. {{ appointments.0.5 }} {{ appointments.0.6 }}</p>
+          <p class="muted" style="font-size:0.85rem; margin:3px 0;">📋 {{ appointments.0.4|default:"General visit" }}</p>
         </div>
       {% else %}
         <div style="text-align:center; padding:28px 16px; color:var(--text-soft);">
@@ -116,7 +113,7 @@
       <h3 style="font-family:var(--font); font-size:0.92rem; font-weight:800; color:var(--gray-800); margin:0 0 14px; display:flex; align-items:center; gap:7px;">⚡ Quick Links</h3>
       <ul style="list-style:none; margin:0; padding:0;">
         <li style="border-bottom:1px solid var(--gray-100);">
-          <a href="{% url 'portal:messages' %}" style="display:flex; align-items:center; gap:9px; padding:10px 4px; color:var(--gray-700); font-weight:600; font-size:0.87rem; font-family:var(--font); text-decoration:none; transition:color 0.15s;">💬 Messages</a>
+          <a href="{% url 'portal:messages' %}" style="display:flex; align-items:center; gap:9px; padding:10px 4px; color:var(--gray-700); font-weight:600; font-size:0.87rem; font-family:var(--font); text-decoration:none;">💬 Messages</a>
         </li>
         <li style="border-bottom:1px solid var(--gray-100);">
           <a href="{% url 'portal:settings' %}" style="display:flex; align-items:center; gap:9px; padding:10px 4px; color:var(--gray-700); font-weight:600; font-size:0.87rem; font-family:var(--font); text-decoration:none;">⚙️ Settings</a>
@@ -124,8 +121,11 @@
         <li style="border-bottom:1px solid var(--gray-100);">
           <a href="{% url 'portal:privacy' %}" style="display:flex; align-items:center; gap:9px; padding:10px 4px; color:var(--gray-700); font-weight:600; font-size:0.87rem; font-family:var(--font); text-decoration:none;">🔒 Privacy</a>
         </li>
-        <li>
+        <li style="border-bottom:1px solid var(--gray-100);">
           <a href="{% url 'portal:data_control' %}" style="display:flex; align-items:center; gap:9px; padding:10px 4px; color:var(--gray-700); font-weight:600; font-size:0.87rem; font-family:var(--font); text-decoration:none;">🗂️ Data Control</a>
+        </li>
+        <li>
+          <a href="{% url 'portal:contact' %}" style="display:flex; align-items:center; gap:9px; padding:10px 4px; color:var(--gray-700); font-weight:600; font-size:0.87rem; font-family:var(--font); text-decoration:none;">📞 Contact Us</a>
         </li>
       </ul>
     </div>
@@ -155,6 +155,160 @@
 
   </div>
 
+  <!-- Bottom section: Health Tip + Appointment Countdown -->
+  <div style="display:grid; grid-template-columns:1.4fr 1fr; gap:0;">
+
+    <!-- Health Tip of the Day -->
+    <div style="padding:24px; border-right:1px solid var(--border);">
+      <h3 style="font-family:var(--font); font-size:0.92rem; font-weight:800; color:var(--gray-800); margin:0 0 14px; display:flex; align-items:center; gap:7px;">💡 Health Tip of the Day</h3>
+      <div id="tip-card" style="background:linear-gradient(145deg,var(--teal-500),var(--teal-800)); border-radius:14px; padding:22px; position:relative; overflow:hidden;">
+        <div style="position:absolute;right:-10px;top:-10px;font-size:5rem;opacity:0.08;">💊</div>
+        <p id="tip-category" style="font-size:0.7rem;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:rgba(255,255,255,0.65);margin:0 0 10px;font-family:var(--font);">Wellness</p>
+        <p id="tip-text" style="font-size:1rem;font-weight:700;color:white;font-family:var(--font);line-height:1.5;margin:0 0 16px;"></p>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div id="tip-dots" style="display:flex; gap:5px;"></div>
+          <div style="display:flex; gap:8px;">
+            <button onclick="prevTip()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:7px;padding:5px 11px;color:white;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:var(--font);">← Prev</button>
+            <button onclick="nextTip()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:7px;padding:5px 11px;color:white;font-size:0.78rem;font-weight:700;cursor:pointer;font-family:var(--font);">Next →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Weather Widget -->
+    <div style="padding:24px;">
+      <h3 style="font-family:var(--font); font-size:0.92rem; font-weight:800; color:var(--gray-800); margin:0 0 14px; display:flex; align-items:center; gap:7px;">🌤️ Huntington, WV</h3>
+      <div id="weather-loading" style="text-align:center; padding:32px 16px; color:var(--text-soft);">
+        <p style="font-size:0.85rem; margin:0;">Loading weather...</p>
+      </div>
+      <div id="weather-content" style="display:none;">
+        <div style="background:var(--teal-50); border:1px solid var(--teal-200); border-radius:14px; padding:20px;">
+          <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
+            <span id="weather-icon" style="font-size:2.8rem; line-height:1;">🌤️</span>
+            <div>
+              <div style="display:flex; align-items:baseline; gap:6px;">
+                <span id="weather-temp" style="font-size:2.8rem; font-weight:900; color:var(--gray-900); font-family:var(--font); letter-spacing:-0.04em; line-height:1;">--</span>
+                <span style="font-size:1.1rem; font-weight:700; color:var(--teal-700); font-family:var(--font);">°F</span>
+              </div>
+              <p id="weather-desc" style="font-size:0.87rem; font-weight:700; color:var(--gray-700); font-family:var(--font); margin:2px 0 0;"></p>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <div style="background:white; border:1px solid var(--teal-200); border-radius:8px; padding:10px 12px;">
+              <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted); margin:0 0 3px; font-family:var(--font);">Humidity</p>
+              <p id="weather-humidity" style="font-size:1rem; font-weight:900; color:var(--gray-900); font-family:var(--font); margin:0;">--%</p>
+            </div>
+            <div style="background:white; border:1px solid var(--teal-200); border-radius:8px; padding:10px 12px;">
+              <p style="font-size:0.7rem; font-weight:700; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-muted); margin:0 0 3px; font-family:var(--font);">Wind</p>
+              <p id="weather-wind" style="font-size:1rem; font-weight:900; color:var(--gray-900); font-family:var(--font); margin:0;">-- mph</p>
+            </div>
+          </div>
+          <p id="weather-advice" style="font-size:0.82rem; color:var(--teal-700); font-weight:600; margin:12px 0 0; font-family:var(--font);"></p>
+        </div>
+      </div>
+      <div id="weather-error" style="display:none; text-align:center; padding:24px 16px; color:var(--text-soft);">
+        <p style="font-size:0.85rem; margin:0;">Unable to load weather data.</p>
+      </div>
+    </div>
+
+  </div>
+
 </div><!-- end container -->
+
+<!-- Health Tip JS -->
+<script>
+  var tips = [
+    { category: "Hydration", text: "Drink at least 8 cups of water daily to support kidney function and keep your energy levels up." },
+    { category: "Sleep", text: "Aim for 7–9 hours of sleep each night. Quality rest supports your immune system and mental health." },
+    { category: "Nutrition", text: "Fill half your plate with fruits and vegetables at each meal for a well-rounded, nutrient-rich diet." },
+    { category: "Movement", text: "Even a 20-minute walk each day can significantly reduce your risk of heart disease and improve mood." },
+    { category: "Preventive Care", text: "Stay up to date with your annual checkups, early detection is one of the best tools for long-term health." },
+    { category: "Mental Health", text: "Take short breaks throughout your day to breathe deeply and reset. Stress management is part of whole-body health." },
+    { category: "Medication", text: "Always take prescriptions as directed and never skip doses without consulting your provider first." },
+  ];
+
+  var today = new Date();
+  var dayIndex = today.getDate() % tips.length;
+  var current = dayIndex;
+
+  function renderTip(index) {
+    var tip = tips[index];
+    document.getElementById('tip-text').textContent = tip.text;
+    document.getElementById('tip-category').textContent = tip.category;
+    var dots = document.getElementById('tip-dots');
+    dots.innerHTML = '';
+    for (var i = 0; i < tips.length; i++) {
+      var d = document.createElement('div');
+      d.style.cssText = 'width:6px;height:6px;border-radius:50%;background:' + (i === index ? 'white' : 'rgba(255,255,255,0.3)') + ';';
+      dots.appendChild(d);
+    }
+  }
+
+  function nextTip() {
+    current = (current + 1) % tips.length;
+    renderTip(current);
+  }
+
+  function prevTip() {
+    current = (current - 1 + tips.length) % tips.length;
+    renderTip(current);
+  }
+
+  renderTip(current);
+</script>
+
+<!-- Weather Widget JS - Open-Meteo, no API key needed -->
+<script>
+(function() {
+  var url = 'https://api.open-meteo.com/v1/forecast?latitude=38.4192&longitude=-82.4452&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=America%2FNew_York';
+
+  function getWeatherDesc(code) {
+    if (code === 0) return { desc: 'Clear sky', icon: '☀️' };
+    if (code <= 2) return { desc: 'Partly cloudy', icon: '⛅' };
+    if (code === 3) return { desc: 'Overcast', icon: '☁️' };
+    if (code <= 49) return { desc: 'Foggy', icon: '🌫️' };
+    if (code <= 59) return { desc: 'Drizzle', icon: '🌦️' };
+    if (code <= 69) return { desc: 'Rainy', icon: '🌧️' };
+    if (code <= 79) return { desc: 'Snowy', icon: '❄️' };
+    if (code <= 84) return { desc: 'Rain showers', icon: '🌧️' };
+    if (code <= 94) return { desc: 'Thunderstorm', icon: '⛈️' };
+    return { desc: 'Stormy', icon: '🌩️' };
+  }
+
+  function getAdvice(code, temp) {
+    if (code >= 80) return '⚠️ Stormy today — stay indoors if you can.';
+    if (code >= 60) return '☂️ Bring an umbrella if you head out today.';
+    if (code >= 50) return '🌫️ Foggy conditions — drive carefully.';
+    if (temp >= 85) return '🥵 Hot out today — stay hydrated!';
+    if (temp <= 32) return '🧥 Freezing temps — bundle up before going out.';
+    if (temp <= 50) return '🧣 Chilly today — grab a jacket!';
+    return '👟 Great weather for a walk outside!';
+  }
+
+  fetch(url)
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var c = data.current;
+      var temp = Math.round(c.temperature_2m);
+      var humidity = Math.round(c.relative_humidity_2m);
+      var wind = Math.round(c.wind_speed_10m);
+      var wx = getWeatherDesc(c.weather_code);
+
+      document.getElementById('weather-temp').textContent = temp;
+      document.getElementById('weather-desc').textContent = wx.desc;
+      document.getElementById('weather-icon').textContent = wx.icon;
+      document.getElementById('weather-humidity').textContent = humidity + '%';
+      document.getElementById('weather-wind').textContent = wind + ' mph';
+      document.getElementById('weather-advice').textContent = getAdvice(c.weather_code, temp);
+
+      document.getElementById('weather-loading').style.display = 'none';
+      document.getElementById('weather-content').style.display = 'block';
+    })
+    .catch(function() {
+      document.getElementById('weather-loading').style.display = 'none';
+      document.getElementById('weather-error').style.display = 'block';
+    });
+})();
+</script>
 
 {% endblock %}

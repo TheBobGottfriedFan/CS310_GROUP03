@@ -57,6 +57,7 @@ urlpatterns = [
         views.manage_insurance_view,
         name="manage_insurance",
     ),
+    path("contact/", views.contact, name="contact"),
 
     # Remove Later.
     path("admin/login-history/", views.login_history_view, name="view_login_history"),
