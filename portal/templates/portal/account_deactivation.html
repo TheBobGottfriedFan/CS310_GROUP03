@@ -1,0 +1,13 @@
+{% extends "portal/base.html" %}
+{% block title %}Account Deactivation | Patient Portal{% endblock %}
+{% block content %}
+<div style="max-width:900px; margin:0 auto; background:white; border-radius:24px; border:1.5px solid var(--border); padding:24px;">
+  <h1 style="margin:0 0 14px;">ACCOUNT DEACTIVATION REQUEST</h1>
+  <form method="POST">
+    {% csrf_token %}
+    <label style="display:block; margin-bottom:8px;">Reason</label>
+    <textarea name="reason" rows="5" placeholder="Why... Why are you requesting to delete your account?" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:12px; margin-bottom:14px;"></textarea>
+    <button class="btn btn-sm" type="submit">Submit Request</button>
+  </form>
+</div>
+{% endblock %}
