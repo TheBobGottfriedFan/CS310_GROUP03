@@ -1,0 +1,33 @@
+{% extends "portal/base.html" %}
+{% block title %}Patient Vitals | Patient Portal{% endblock %}
+{% block content %}
+<div style="max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:16px;">
+  <div style="background:white; border-radius:24px; border:1.5px solid var(--border); padding:24px;">
+    <h1 style="margin:0 0 14px;">Enter Patient Vitals</h1>
+    <form method="POST" style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+      {% csrf_token %}
+      <input type="text" name="blood_pressure" placeholder="Blood Pressure" style="padding:12px; border:1px solid var(--border); border-radius:12px;">
+      <input type="text" name="pulse" placeholder="Pulse" style="padding:12px; border:1px solid var(--border); border-radius:12px;">
+      <input type="text" name="temperature" placeholder="Temperature" style="padding:12px; border:1px solid var(--border); border-radius:12px;">
+      <input type="text" name="respiratory_rate" placeholder="Respiratory Rate" style="padding:12px; border:1px solid var(--border); border-radius:12px;">
+      <textarea name="note" rows="3" placeholder="Notes" style="grid-column:1 / -1; padding:12px; border:1px solid var(--border); border-radius:12px;"></textarea>
+      <div style="grid-column:1 / -1; display:flex; justify-content:flex-end;">
+        <button class="btn btn-sm" type="submit">Save Vitals</button>
+      </div>
+    </form>
+  </div>
+  <div style="background:white; border-radius:24px; border:1.5px solid var(--border); padding:24px;">
+    <h2 style="margin:0 0 12px;">Saved Vitals</h2>
+    {% if vitals %}
+      {% for v in vitals %}
+        <div style="padding:14px; border:1px solid var(--border); border-radius:12px; margin-bottom:10px;">
+          <div><strong>Recorded:</strong> {{ v.recorded_at }}</div>
+          <div style="margin-top:6px; white-space:pre-wrap;">{{ v.record_data }}</div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>Kindly go to https://www.durgasoftonline.com/ to learn more about durgasoft, KINDLY.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
