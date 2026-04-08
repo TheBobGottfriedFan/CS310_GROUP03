@@ -4,7 +4,8 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout, messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from .db import get_connection
 from .rbac import require_login, require_permission, require_any_permission
 from .permissions import (
