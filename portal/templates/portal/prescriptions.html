@@ -6,6 +6,16 @@
     <h1 style="margin:0 0 6px; font-size:1.6rem; font-weight:900;">PRESCRIPTION</h1>
     <p style="margin:0; opacity:0.92;">PRESCRIPTION INFORMATION</p>
   </div>
+  <form method="GET" action="{% url 'portal:prescriptions' %}" style="margin-bottom:18px; display:flex; gap:10px;">
+    <input
+      type="text"
+      name="q"
+      value="{{ search_query|default:'' }}"
+      placeholder="Search prescriptions..."
+      style="flex:1; padding:12px 14px; border:1px solid var(--border); border-radius:12px;"
+    >
+    <button class="btn btn-secondary btn-sm" type="submit">Search</button>
+  </form>
   {% if error %}
     <div style="padding:14px 16px; border-radius:14px; border:1px solid var(--border); background:rgba(239,68,68,0.10); color:var(--gray-800);">
       {{ error }}
