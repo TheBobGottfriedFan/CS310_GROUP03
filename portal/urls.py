@@ -44,6 +44,13 @@ urlpatterns = [
         views.request_refill_view,
         name="request_refill",
     ),
+    path("messages/<int:message_id>/", views.message_detail_view, name="message_detail"),
+    path("data-sharing-preferences/", views.data_sharing_preferences_view, name="data_sharing_preferences"),
+    path("pharmacy/", views.pharmacy_view, name="pharmacy"),
+    path("vitals/", views.vitals_view, name="vitals"),
+    path("billing/", views.billing_view, name="billing"),
+    path("account-deactivation/", views.account_deactivation_view, name="account_deactivation"),
+    path("delete-account/", views.delete_account_view, name="delete_account"),
     path("refills/<int:refill_id>/approve/", views.approve_refill_view, name="approve_refill"),
     path(
         "patient/insurance/<int:patient_id>/manage/",
