@@ -1,0 +1,27 @@
+{% extends "portal/base.html" %}
+{% block title %}Pharmacy | Patient Portal{% endblock %}
+{% block content %}
+<div style="max-width:900px; margin:0 auto; display:flex; flex-direction:column; gap:16px;">
+  <div style="background:white; border-radius:24px; border:1.5px solid var(--border); padding:24px;">
+    <h1 style="margin:0 0 12px;">PHARMACY BIAS PREFERENCE</h1>
+    {% if current_pharmacy %}
+      <p><strong>Current:</strong> {{ current_pharmacy.name }} — {{ current_pharmacy.address }}</p>
+    {% else %}
+      <p>THERE IS NO PREFERRED PHARMACY?</p>
+    {% endif %}
+  </div>
+  <div style="background:white; border-radius:24px; border:1.5px solid var(--border); padding:24px;">
+    <form method="POST">
+      {% csrf_token %}
+      <label style="display:block; margin-bottom:8px;">PHARMACY SELECTION</label>
+      <select name="pharmacy_id" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:12px; margin-bottom:14px;">
+        <option value="">PHARMACY CHOOSE</option>
+        {% for p in pharmacies %}
+          <option value="{{ p.id }}">{{ p.name }} — {{ p.address }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-sm" type="submit">PHARMACY SAVE</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
