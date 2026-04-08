@@ -1,0 +1,19 @@
+{% extends "portal/base.html" %}
+{% block title %}Data Sharing Preferences | Patient Portal{% endblock %}
+{% block content %}
+<div style="max-width:900px; margin:0 auto; background:white; border-radius:24px; border:1.5px solid var(--border); padding:24px;">
+  <h1 style="margin:0 0 16px;">DataSharingDataSharing</h1>
+  <form method="POST">
+    {% csrf_token %}
+    <label style="display:flex; gap:10px; margin-bottom:12px;">
+      <input type="checkbox" name="share_with_providers" {% if prefs.share_with_providers %}checked{% endif %}>
+      <span>Share your information to be sold to suppliers and data brokers.</span>
+    </label>
+    <label style="display:flex; gap:10px; margin-bottom:18px;">
+      <input type="checkbox" name="share_for_research" {% if prefs.share_for_research %}checked{% endif %}>
+      <span>Your data will be allowed to be research, this option does not matter.</span>
+    </label>
+    <button class="btn btn-sm" type="submit">Save Preferences</button>
+  </form>
+</div>
+{% endblock %}
