@@ -6,6 +6,8 @@ from django.views.decorators.http import require_http_methods
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, messages
 from .db import get_connection
+from datetime import timedelta
+from django.utils import timezone
 from .rbac import require_login, require_permission, require_any_permission
 from .permissions import (
     ACCESS_PATIENT_FILE,
@@ -234,10 +236,55 @@ def login_view(request):
     )
     return redirect("portal:dashboard")
 
+def _create_upcoming_appointment_reminders(user_id: int) -> None:
+    now_naive = timezone.now().replace(tzinfo=None)
+    soon_naive = (timezone.now() + timedelta(hours=24)).replace(tzinfo=None)
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT id, start_time
+            FROM appointments
+            WHERE patient_id = %s
+              AND status = 'scheduled'
+              AND start_time >= %s
+              AND start_time <= %s
+            """,
+            (user_id, now_naive, soon_naive),
+        )
+        appointments = cur.fetchall()
+        cur2 = conn.cursor()
+        for appt in appointments:
+            message = f"Reminder: Appointment #{appt['id']} is scheduled for {appt['start_time']}."
+            cur.execute(
+                """
+                SELECT id
+                FROM notifications
+                WHERE user_id = %s AND category = 'appointment' AND message = %s
+                LIMIT 1
+                """,
+                (user_id, message),
+            )
+            existing = cur.fetchone()
+            if not existing:
+                cur2.execute(
+                    """
+                    INSERT INTO notifications (user_id, category, message)
+                    VALUES (%s, 'appointment', %s)
+                    """,
+                    (user_id, message),
+                )
+        conn.commit()
+    finally:
+        if conn:
+            conn.close()
 
 @require_login
 def dashboard_view(request):
     user_id = int(request.session["user_id"])
+    _create_upcoming_appointment_reminders(user_id)
     portal_messages = _get_placeholder_messages()
     context = {
         "username": request.session.get("display_name") or request.session.get("email"),
@@ -364,6 +411,7 @@ def profile_view(request):
 @require_login
 def notifications_view(request):
     user_id = int(request.session["user_id"])
+    _create_upcoming_appointment_reminders(user_id)
     context = {
         "username": request.session.get("display_name") or request.session.get("email"),
         "notif_unread_count": get_unread_count(user_id),
@@ -633,6 +681,7 @@ def manage_availability_view(request):
 @require_login
 def appointments_filtered_view(request):
     user_id = int(request.session["user_id"])
+    _create_upcoming_appointment_reminders(user_id)
     role_id = int(request.session.get("role_id", 0))
     date_from = (request.GET.get("date_from") or "").strip()
     date_to = (request.GET.get("date_to") or "").strip()
@@ -1664,3 +1713,319 @@ def _list_patient_prescriptions(user_id: int):
     finally:
         if conn:
             conn.close()
+
+
+@require_login
+def message_detail_view(request, message_id: int):
+    user_id = int(request.session["user_id"])
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT m.id, m.thread_id, m.sender_id, m.receiver_id, m.body, m.sent_at, m.is_read, m.read_at,
+                   mt.subject
+            FROM messages m
+            LEFT JOIN message_threads mt ON mt.id = m.thread_id
+            WHERE m.id = %s
+              AND (m.sender_id = %s OR m.receiver_id = %s)
+            LIMIT 1
+            """,
+            (message_id, user_id, user_id),
+        )
+        message = cur.fetchone()
+        if not message:
+            return JsonResponse({"ok": False, "error": "MESSAGE HAS NOT BEEN FOUND."}, status=404)
+        if int(message["receiver_id"]) == user_id and not message["is_read"]:
+            cur2 = conn.cursor()
+            cur2.execute(
+                """
+                UPDATE messages
+                SET is_read = 1, read_at = NOW()
+                WHERE id = %s
+                """,
+                (message_id,),
+            )
+            conn.commit()
+            message["is_read"] = True
+    finally:
+        if conn:
+            conn.close()
+    return render(
+        request,
+        "portal/message_detail.html",
+        {
+            "username": request.session.get("display_name") or request.session.get("email"),
+            "message": message,
+        },
+    )
+
+
+@require_login
+@require_http_methods(["GET", "POST"])
+def data_sharing_preferences_view(request):
+    user_id = int(request.session["user_id"])
+    if request.method == "POST":
+        share_with_providers = 1 if request.POST.get("share_with_providers") else 0
+        share_for_research = 1 if request.POST.get("share_for_research") else 0
+        conn = None
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute(
+                """
+                INSERT INTO data_sharing_prefs (patient_id, share_with_providers, share_for_research)
+                VALUES (%s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                    share_with_providers = VALUES(share_with_providers),
+                    share_for_research = VALUES(share_for_research)
+                """,
+                (user_id, share_with_providers, share_for_research),
+            )
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
+        return redirect("portal:data_sharing_preferences")
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT share_with_providers, share_for_research
+            FROM data_sharing_prefs
+            WHERE patient_id = %s
+            LIMIT 1
+            """,
+            (user_id,),
+        )
+        prefs = cur.fetchone() or {}
+    finally:
+        if conn:
+            conn.close()
+    return render(
+        request,
+        "portal/data_sharing_preferences.html",
+        {
+            "username": request.session.get("display_name") or request.session.get("email"),
+            "prefs": prefs,
+        },
+    )
+
+
+@require_login
+@require_http_methods(["GET", "POST"])
+def pharmacy_view(request):
+    user_id = int(request.session["user_id"])
+    if request.method == "POST":
+        pharmacy_id_raw = (request.POST.get("pharmacy_id") or "").strip()
+        if not pharmacy_id_raw:
+            return redirect("portal:pharmacy")
+        try:
+            pharmacy_id = int(pharmacy_id_raw)
+        except ValueError:
+            pharmacy_id = 0
+        if pharmacy_id:
+            conn = None
+            try:
+                conn = get_connection()
+                cur = conn.cursor()
+                cur.execute(
+                    """
+                    UPDATE pharmacy_patient
+                    SET is_preferred = 0
+                    WHERE patient_id = %s
+                    """,
+                    (user_id,),
+                )
+                cur.execute(
+                    """
+                    INSERT INTO pharmacy_patient (patient_id, pharmacy_id, is_preferred)
+                    VALUES (%s, %s, 1)
+                    ON DUPLICATE KEY UPDATE is_preferred = 1
+                    """,
+                    (user_id, pharmacy_id),
+                )
+                conn.commit()
+            finally:
+                if conn:
+                    conn.close()
+        return redirect("portal:pharmacy")
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT id, name, phone, address
+            FROM pharmacies
+            ORDER BY name
+            """
+        )
+        pharmacies = cur.fetchall()
+        cur.execute(
+            """
+            SELECT pp.pharmacy_id, p.name, p.phone, p.address
+            FROM pharmacy_patient pp
+            JOIN pharmacies p ON p.id = pp.pharmacy_id
+            WHERE pp.patient_id = %s AND pp.is_preferred = 1
+            LIMIT 1
+            """,
+            (user_id,),
+        )
+        current_pharmacy = cur.fetchone()
+    finally:
+        if conn:
+            conn.close()
+    return render(
+        request,
+        "portal/pharmacy.html",
+        {
+            "username": request.session.get("display_name") or request.session.get("email"),
+            "pharmacies": pharmacies,
+            "current_pharmacy": current_pharmacy,
+        },
+    )
+
+
+@require_login
+@require_http_methods(["GET", "POST"])
+def vitals_view(request):
+    user_id = int(request.session["user_id"])
+    if request.method == "POST":
+        blood_pressure = (request.POST.get("blood_pressure") or "").strip()
+        pulse = (request.POST.get("pulse") or "").strip()
+        temperature = (request.POST.get("temperature") or "").strip()
+        respiratory_rate = (request.POST.get("respiratory_rate") or "").strip()
+        note = (request.POST.get("note") or "").strip()
+        record_data = (
+            f"blood_pressure={blood_pressure}; "
+            f"pulse={pulse}; "
+            f"temperature={temperature}; "
+            f"respiratory_rate={respiratory_rate}; "
+            f"note={note}"
+        )
+        conn = None
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute(
+                """
+                INSERT INTO medical_records (patient_id, created_by, record_type, record_data)
+                VALUES (%s, %s, 'vitals', %s)
+                """,
+                (user_id, user_id, record_data),
+            )
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
+
+        return redirect("portal:vitals")
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(
+            """
+            SELECT id, record_data, recorded_at
+            FROM medical_records
+            WHERE patient_id = %s AND record_type = 'vitals'
+            ORDER BY recorded_at DESC, id DESC
+            """,
+            (user_id,),
+        )
+        vitals = cur.fetchall()
+    finally:
+        if conn:
+            conn.close()
+    return render(
+        request,
+        "portal/vitals.html",
+        {
+            "username": request.session.get("display_name") or request.session.get("email"),
+            "vitals": vitals,
+        },
+    )
+
+
+@require_login
+def billing_view(request):
+    return render(
+        request,
+        "portal/billing.html",
+        {
+            "username": request.session.get("display_name") or request.session.get("email"),
+            "billing_items": [],
+        },
+    )
+
+
+@require_login
+@require_http_methods(["GET", "POST"])
+def account_deactivation_view(request):
+    user_id = int(request.session["user_id"])
+    if request.method == "POST":
+        reason = (request.POST.get("reason") or "").strip()
+        conn = None
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute(
+                """
+                INSERT INTO support_tickets (created_by, subject, description, status)
+                VALUES (%s, %s, %s, 'open')
+                """,
+                (user_id, "Account Deactivation Request", reason or "User requested account deactivation."),
+            )
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
+        return redirect("portal:account_deactivation")
+    return render(
+        request,
+        "portal/account_deactivation.html",
+        {
+            "username": request.session.get("display_name") or request.session.get("email"),
+        },
+    )
+
+
+@require_login
+@require_http_methods(["GET", "POST"])
+def delete_account_view(request):
+    user_id = int(request.session["user_id"])
+    if request.method == "POST":
+        confirm = (request.POST.get("confirm_delete") or "").strip()
+        if confirm != "DELETE":
+            return render(
+                request,
+                "portal/delete_account.html",
+                {
+                    "username": request.session.get("display_name") or request.session.get("email"),
+                    "error": "Type DELETE to confirm account deletion.",
+                },
+            )
+        conn = None
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
+        logout(request)
+        request.session.flush()
+        return redirect("portal:signup")
+    return render(
+        request,
+        "portal/delete_account.html",
+        {
+            "username": request.session.get("display_name") or request.session.get("email"),
+        },
+    )
+
