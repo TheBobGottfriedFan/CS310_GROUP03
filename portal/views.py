@@ -951,7 +951,7 @@ def approve_refill_view(request, refill_id: int):
         )
         refill = cur.fetchone()
         if not refill:
-            messages.error(request, "Saar, your refill request is not found.")
+            messages.error(request, "your refill request is not found.")
             return redirect("portal:dashboard")
         cur = conn.cursor()
         cur.execute(
@@ -983,7 +983,7 @@ def manage_insurance_view(request, patient_id: int):
     user_id = int(request.session["user_id"])
     role_id = int(request.session.get("role_id", 0))
     if role_id == 1 and patient_id != user_id:
-        messages.error(request, "Saar, stop trying to access other insurance information before the juggernaut rolls you.")
+        messages.error(request, "stop trying to access other insurance information before the juggernaut rolls you.")
         return redirect("portal:profile")
     payer_name = (request.POST.get("payer_name") or "").strip()
     member_id = (request.POST.get("member_id") or "").strip()
@@ -1060,7 +1060,7 @@ def schedule_follow_up_appointment_view(request, appointment_id: int):
             return redirect("portal:appointments_filtered")
 
         if int(parent["patient_id"]) != user_id:
-            messages.error(request, "Saar, you can only schedule followups for YOUR own.")
+            messages.error(request, "you can only schedule followups for YOUR own.")
             return redirect("portal:appointments_filtered")
 
         slot_id = int(request.POST.get("slot_id", "0") or 0)
