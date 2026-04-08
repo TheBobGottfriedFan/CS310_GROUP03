@@ -498,29 +498,45 @@ def view_messages_view(request):
 @require_http_methods(["POST"])
 def send_messages_view(request):
     sender_id = int(request.session["user_id"])
-    receiver_id = int(request.POST.get("receiver_id", "0") or 0)
-    subject = (request.POST.get("subject") or "").strip()
+    receiver_id_raw = (request.POST.get("receiver_id") or "").strip()
     body = (request.POST.get("body") or "").strip()
-    if not receiver_id or not body:
-        return JsonResponse(
-            {"ok": False, "error": "receiver_id and body are required."},
-            status=400,
-        )
+    subject = (request.POST.get("subject") or "").strip() or "Portal Message"
+    if not receiver_id_raw:
+        messages.error(request, "Receiver ID is required.")
+        return redirect("portal:messages")
+    if not body:
+        messages.error(request, "Message body is required.")
+        return redirect("portal:messages")
+    try:
+        receiver_id = int(receiver_id_raw)
+    except ValueError:
+        messages.error(request, "Receiver ID must be a valid number.")
+        return redirect("portal:messages")
     conn = None
     try:
         conn = get_connection()
         cur = conn.cursor(dictionary=True)
-        thread_id = None
-        if subject:
-            cur.execute(
-                """
-                INSERT INTO message_threads (subject, created_by)
-                VALUES (%s, %s)
-                """,
-                (subject, sender_id),
-            )
-            thread_id = cur.lastrowid
-        cur = conn.cursor()
+        cur.execute(
+            """
+            SELECT id
+            FROM users
+            WHERE id = %s AND is_active = 1
+            LIMIT 1
+            """,
+            (receiver_id,),
+        )
+        receiver = cur.fetchone()
+        if not receiver:
+            messages.error(request, "Receiver not found.")
+            return redirect("portal:messages")
+        cur.execute(
+            """
+            INSERT INTO message_threads (subject, created_by)
+            VALUES (%s, %s)
+            """,
+            (subject, sender_id),
+        )
+        thread_id = cur.lastrowid
         cur.execute(
             """
             INSERT INTO messages (thread_id, sender_id, receiver_id, body)
@@ -528,25 +544,19 @@ def send_messages_view(request):
             """,
             (thread_id, sender_id, receiver_id, body),
         )
-        message_id = cur.lastrowid
         cur.execute(
             """
             INSERT INTO notifications (user_id, category, message)
             VALUES (%s, 'message', %s)
             """,
-            (receiver_id, f"New message from user {sender_id}."),
+            (receiver_id, f"You have a new message: {subject}"),
         )
         conn.commit()
     finally:
         if conn:
             conn.close()
-    return JsonResponse(
-        {
-            "ok": True,
-            "permission": SEND_MESSAGES,
-            "message_id": message_id,
-        }
-    )
+    messages.success(request, "Message sent successfully.")
+    return redirect("portal:messages")
 
 
 @require_permission(REQUEST_APPOINTMENT)
@@ -633,7 +643,7 @@ def request_appointment_view(request):
 def cancel_appointment_view(request, appointment_id: int):
     user_id = int(request.session["user_id"])
     role_id = int(request.session.get("role_id", 0))
-    cancel_note = (request.POST.get("cancel_note") or "").strip()
+    cancel_note = (request.POST.get("cancel_note") or "").strip() or None
     conn = None
     try:
         conn = get_connection()
@@ -649,11 +659,14 @@ def cancel_appointment_view(request, appointment_id: int):
         )
         appointment = cur.fetchone()
         if not appointment:
-            return JsonResponse({"ok": False, "error": "Appointment not found."}, status=404)
+            messages.error(request, "Saaaar, the appointment has not been found..")
+            return redirect("portal:appointments_filtered")
         if role_id == 1 and int(appointment["patient_id"]) != user_id:
-            return JsonResponse({"ok": False, "error": "Not allowed."}, status=403)
+            messages.error(request, "Samir, you can only cancel your own appointments.")
+            return redirect("portal:appointments_filtered")
         if appointment["status"] == "cancelled":
-            return JsonResponse({"ok": False, "error": "Appointment already cancelled."}, status=400)
+            messages.warning(request, "Maam, this appointment is cancelled.")
+            return redirect("portal:appointment_detail", appointment_id=appointment_id)
         cur = conn.cursor()
         cur.execute(
             """
@@ -661,7 +674,7 @@ def cancel_appointment_view(request, appointment_id: int):
             SET status = 'cancelled', cancel_note = %s
             WHERE id = %s
             """,
-            (cancel_note or None, appointment_id),
+            (cancel_note, appointment_id),
         )
         cur.execute(
             """
@@ -677,19 +690,14 @@ def cancel_appointment_view(request, appointment_id: int):
             INSERT INTO notifications (user_id, category, message)
             VALUES (%s, 'appointment', %s)
             """,
-            (notify_user_id, f"Appointment #{appointment_id} was cancelled."),
+            (notify_user_id, f"Appointment #{appointment_id} has been cancelled."),
         )
         conn.commit()
     finally:
         if conn:
             conn.close()
-    return JsonResponse(
-        {
-            "ok": True,
-            "permission": CANCEL_APPOINTMENT,
-            "appointment_id": appointment_id,
-        }
-    )
+    messages.success(request, "SUCCESSFULY CANCELED.")
+    return redirect("portal:appointments_filtered")
 
 
 @require_permission(MANAGE_APPOINTMENTS)
@@ -875,7 +883,6 @@ def view_prescriptions_view(request, patient_id: int):
 def manage_prescriptions_view(request):
     return JsonResponse({"ok": True, "permission": MANAGE_PRESCRIPTIONS})
 
-
 @require_permission(REQUEST_REFILL)
 @require_http_methods(["POST"])
 def request_refill_view(request, prescription_id: int):
@@ -896,9 +903,12 @@ def request_refill_view(request, prescription_id: int):
         )
         prescription = cur.fetchone()
         if not prescription:
-            return JsonResponse({"ok": False, "error": "Prescription not found."}, status=404)
+            messages.error(request, "PRESCRIPTION UNFOUND.")
+            return redirect("portal:prescriptions")
+
         if int(prescription["patient_id"]) != user_id:
-            return JsonResponse({"ok": False, "error": "Not allowed."}, status=403)
+            messages.error(request, "maam, you can only request your own prescriptions .")
+            return redirect("portal:prescriptions")
         cur = conn.cursor()
         cur.execute(
             """
@@ -908,7 +918,6 @@ def request_refill_view(request, prescription_id: int):
             (prescription_id, user_id, note or None),
         )
         refill_id = cur.lastrowid
-
         cur.execute(
             """
             INSERT INTO notifications (user_id, category, message)
@@ -920,14 +929,8 @@ def request_refill_view(request, prescription_id: int):
     finally:
         if conn:
             conn.close()
-    return JsonResponse(
-        {
-            "ok": True,
-            "permission": REQUEST_REFILL,
-            "prescription_id": prescription_id,
-            "refill_id": refill_id,
-        }
-    )
+    messages.success(request, "SUCCESSFULLY REFILL REQUEST SENT.")
+    return redirect("portal:prescriptions")
 
 
 @require_permission(APPROVE_REFILL)
@@ -948,7 +951,8 @@ def approve_refill_view(request, refill_id: int):
         )
         refill = cur.fetchone()
         if not refill:
-            return JsonResponse({"ok": False, "error": "Refill request not found."}, status=404)
+            messages.error(request, "Saar, your refill request is not found.")
+            return redirect("portal:dashboard")
         cur = conn.cursor()
         cur.execute(
             """
@@ -963,19 +967,14 @@ def approve_refill_view(request, refill_id: int):
             INSERT INTO notifications (user_id, category, message)
             VALUES (%s, 'medication', %s)
             """,
-            (int(refill["requested_by"]), f"Refill request #{refill_id} was approved."),
+            (int(refill["requested_by"]), f"REFILL REQUEST #{refill_id} APPROVED."),
         )
         conn.commit()
     finally:
         if conn:
             conn.close()
-    return JsonResponse(
-        {
-            "ok": True,
-            "permission": APPROVE_REFILL,
-            "refill_id": refill_id,
-        }
-    )
+    messages.success(request, "APPROVED REFILL.")
+    return redirect("portal:dashboard")
 
 
 @require_permission(MANAGE_INSURANCE)
@@ -984,7 +983,8 @@ def manage_insurance_view(request, patient_id: int):
     user_id = int(request.session["user_id"])
     role_id = int(request.session.get("role_id", 0))
     if role_id == 1 and patient_id != user_id:
-        return JsonResponse({"ok": False, "error": "Not allowed."}, status=403)
+        messages.error(request, "Saar, stop trying to access other insurance information before the juggernaut rolls you.")
+        return redirect("portal:profile")
     payer_name = (request.POST.get("payer_name") or "").strip()
     member_id = (request.POST.get("member_id") or "").strip()
     plan_name = (request.POST.get("plan_name") or "").strip() or None
@@ -997,13 +997,9 @@ def manage_insurance_view(request, patient_id: int):
     phone = (request.POST.get("phone") or "").strip() or None
     address = (request.POST.get("address") or "").strip() or None
     is_primary = 1 if (request.POST.get("is_primary") or "1").strip() in {"1", "true", "True", "yes"} else 0
-
     if not payer_name or not member_id:
-        return JsonResponse(
-            {"ok": False, "error": "payer_name and member_id are required."},
-            status=400,
-        )
-
+        messages.error(request, "Payer name and member ID required.")
+        return redirect("portal:profile")
     conn = None
     try:
         conn = get_connection()
@@ -1033,19 +1029,12 @@ def manage_insurance_view(request, patient_id: int):
                 is_primary,
             ),
         )
-        policy_id = cur.lastrowid
         conn.commit()
     finally:
         if conn:
             conn.close()
-    return JsonResponse(
-        {
-            "ok": True,
-            "permission": MANAGE_INSURANCE,
-            "patient_id": patient_id,
-            "policy_id": policy_id,
-        }
-    )
+    messages.success(request, "SUCCESSFULY SAVED INSURANCE INFO.")
+    return redirect("portal:profile")
 
 
 @require_permission(REQUEST_APPOINTMENT)
@@ -1067,13 +1056,20 @@ def schedule_follow_up_appointment_view(request, appointment_id: int):
         )
         parent = cur.fetchone()
         if not parent:
-            return JsonResponse({"ok": False, "error": "Appointment not found."}, status=404)
+            messages.error(request, "Samir, we cannot find your appointment.")
+            return redirect("portal:appointments_filtered")
+
         if int(parent["patient_id"]) != user_id:
-            return JsonResponse({"ok": False, "error": "Not allowed."}, status=403)
+            messages.error(request, "Saar, you can only schedule followups for YOUR own.")
+            return redirect("portal:appointments_filtered")
+
         slot_id = int(request.POST.get("slot_id", "0") or 0)
         reason = (request.POST.get("reason") or parent.get("reason") or "Follow-up appointment").strip()
+
         if not slot_id:
-            return JsonResponse({"ok": False, "error": "slot_id is required."}, status=400)
+            messages.error(request, "Slot ID is required.")
+            return redirect("portal:appointment_detail", appointment_id=appointment_id)
+
         cur.execute(
             """
             SELECT id, provider_id, start_time, end_time, status
@@ -1085,11 +1081,14 @@ def schedule_follow_up_appointment_view(request, appointment_id: int):
         )
         slot = cur.fetchone()
         if not slot:
-            return JsonResponse({"ok": False, "error": "Slot not found."}, status=404)
+            messages.error(request, "NO SLOT FOUND.")
+            return redirect("portal:appointment_detail", appointment_id=appointment_id)
         if slot["status"] != "open":
-            return JsonResponse({"ok": False, "error": "Slot is not available."}, status=400)
+            messages.error(request, "SLOT NOT AVAILABLE.")
+            return redirect("portal:appointment_detail", appointment_id=appointment_id)
         if int(slot["provider_id"]) != int(parent["provider_id"]):
-            return JsonResponse({"ok": False, "error": "Slot must belong to the same provider."}, status=400)
+            messages.error(request, "SLOT MUST BELONG TO THE SAME PROVIDER SAMIR.")
+            return redirect("portal:appointment_detail", appointment_id=appointment_id)
         cur = conn.cursor()
         cur.execute(
             """
@@ -1124,20 +1123,14 @@ def schedule_follow_up_appointment_view(request, appointment_id: int):
             INSERT INTO notifications (user_id, category, message)
             VALUES (%s, 'appointment', %s)
             """,
-            (int(parent["provider_id"]), f"New follow-up appointment request #{new_appointment_id}."),
+            (int(parent["provider_id"]), f"New follow-up appointment #{new_appointment_id} has been scheduled."),
         )
         conn.commit()
     finally:
         if conn:
             conn.close()
-    return JsonResponse(
-        {
-            "ok": True,
-            "permission": REQUEST_APPOINTMENT,
-            "appointment_id": new_appointment_id,
-            "parent_appointment_id": appointment_id,
-        }
-    )
+    messages.success(request, "Follow-up appointment scheduled successfully.")
+    return redirect("portal:appointment_detail", appointment_id=new_appointment_id)
 
 
 @require_login
