@@ -3,7 +3,7 @@
 ### Authors
 - **Bob / Colton** - Project Lead, Backend, patientportalsystem folder, authentication_service.py, backend.py, db.py, forms.py, models.py, notification_service.py, permissions.py, rbac.py, urls.py, views.py, Database Code, SQL schema, seed data, triggers
 - **Jeffrey** - UI/UX, HTML/CSS frontend, Sign-in/Logout, urls.py, .env configuration, README
-- **Kendra** - Frontend contributions, testing
+- **Kendra** - Frontend contributions, Contact Doctors Code, testing
 - **Kirubel** - Testing (PPTC-007 through PPTC-011)
 - **Michael** - Testing (PPTC-012 through PPTC-016), appointment cancellation, delete account
  
