@@ -6,7 +6,10 @@
 - **Kendra** - Frontend contributions, Contact Doctors Code, testing
 - **Kirubel** - Testing (PPTC-007 through PPTC-011)
 - **Michael** - Testing (PPTC-012 through PPTC-016), appointment cancellation, delete account
- 
+
+### Link
+https://github.com/TheBobGottfriedFan/CS310_GROUP03
+
 ## Overview
 The GROUP03 Patient Portal is a Django + MySQL web application designed to support healthcare portal functionality. It includes custom SQL-backend authentication, Role-Based Access Control (RBAC), bcrypt password hashing, session validation, notifications, and several patient workflows. The project uses Django for routing and page templates, and interacts with MySQL via mysql.connector for application logic.
  
@@ -70,15 +73,6 @@ The GROUP03 Patient Portal is a Django + MySQL web application designed to suppo
 ### Access Control
 - Role-Based Access Control (RBAC) — patients cannot access staff/doctor routes
 - Appointment detail access control — patients can only view their own appointments
- 
-## Stack
-- Python
-- Django
-- MySQL
-- mysql-connector-python
-- bcrypt
-- python-dotenv
-- HTML / CSS
  
 # How to Install
  
