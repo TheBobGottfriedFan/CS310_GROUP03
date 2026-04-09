@@ -1,13 +1,11 @@
 # Patient Portal System
  
 ### Authors
-- **Bob** - Project Lead, Backend, patientportalsystem folder, authentication_service.py, backend.py, db.py, forms.py, models.py, notification_service.py, permissions.py, rbac.py, urls.py, views.py
-- **Colton** - Database Code, SQL schema, seed data, triggers
+- **Bob / Colton** - Project Lead, Backend, patientportalsystem folder, authentication_service.py, backend.py, db.py, forms.py, models.py, notification_service.py, permissions.py, rbac.py, urls.py, views.py, Database Code, SQL schema, seed data, triggers
 - **Jeffrey** - UI/UX, HTML/CSS frontend, Sign-in/Logout, urls.py, .env configuration, README
 - **Kendra** - Frontend contributions, testing
 - **Kirubel** - Testing (PPTC-007 through PPTC-011)
 - **Michael** - Testing (PPTC-012 through PPTC-016), appointment cancellation, delete account
-- **Keshon** - Contributions
  
 ## Overview
 The GROUP03 Patient Portal is a Django + MySQL web application designed to support healthcare portal functionality. It includes custom SQL-backend authentication, Role-Based Access Control (RBAC), bcrypt password hashing, session validation, notifications, and several patient workflows. The project uses Django for routing and page templates, and interacts with MySQL via mysql.connector for application logic.
@@ -193,9 +191,6 @@ a. Login via a seeded user from the SQL seed files
 b. Create a new patient account on the signup page
  
 ---
- 
-# Trademark
-Durgasoft™
 
 a. Login via a seeded user in the seeded SQL files
 
