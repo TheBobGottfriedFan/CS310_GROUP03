@@ -44,8 +44,7 @@ The GROUP03 Patient Portal is a Django + MySQL web application designed to suppo
 - Cancel an appointment
 - View appointment details (access controlled per patient)
 - Filter appointments by date range
-- Receive appointment reminders
- 
+   
 ### Messaging
 - Send message to staff
 - View message details
@@ -58,10 +57,6 @@ The GROUP03 Patient Portal is a Django + MySQL web application designed to suppo
 ### Prescriptions
 - Prescription search
 - Request prescription refill
- 
-### Billing & Pharmacy
-- View billing information
-- Change patient pharmacy
  
 ### Privacy & Data
 - View privacy settings
