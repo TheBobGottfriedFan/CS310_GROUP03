@@ -5,7 +5,7 @@
 - **Jeffrey** - UI/UX, HTML/CSS frontend, Sign-in/Logout, urls.py, .env configuration, README
 - **Kendra** - Frontend contributions, Contact Doctors Code, testing, README
 - **Michael** - Testing (PPTC-012 through PPTC-016), appointment cancellation, delete account, README
-- **Kirubel** - Testing (PPTC-007 through PPTC-011)
+- **Kirubel** - Testing (PPTC-007 through PPTC-011), unit test seeds
 
 ### Link
 https://github.com/TheBobGottfriedFan/CS310_GROUP03
