@@ -75,7 +75,9 @@ The GROUP03 Patient Portal is a Django + MySQL web application designed to suppo
 - Appointment detail access control — patients can only view their own appointments
  
 # How to Install
- 
+
+## Windows
+
 ### 1. Clone the Repository
 Either do:
  
@@ -184,6 +186,9 @@ b. Create a new patient account on the signup page
 a. Login via a seeded user in the seeded SQL files
 
 b. create a new patient account in the sign-up page
+
+
+## Mac
 
 
 # Trademark
