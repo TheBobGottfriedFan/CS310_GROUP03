@@ -1,11 +1,11 @@
 # Patient Portal System
  
 ### Authors
-- **Bob / Colton** - Project Lead, Backend, patientportalsystem folder, authentication_service.py, backend.py, db.py, forms.py, models.py, notification_service.py, permissions.py, rbac.py, urls.py, views.py, Database Code, SQL schema, seed data, triggers
+- **Colton / Bob** - Project Lead, Backend, patientportalsystem folder, authentication_service.py, backend.py, db.py, forms.py, models.py, notification_service.py, permissions.py, rbac.py, urls.py, views.py, Database Code, SQL schema, seed data, triggers, README
 - **Jeffrey** - UI/UX, HTML/CSS frontend, Sign-in/Logout, urls.py, .env configuration, README
-- **Kendra** - Frontend contributions, Contact Doctors Code, testing
+- **Kendra** - Frontend contributions, Contact Doctors Code, testing, README
+- **Michael** - Testing (PPTC-012 through PPTC-016), appointment cancellation, delete account, README
 - **Kirubel** - Testing (PPTC-007 through PPTC-011)
-- **Michael** - Testing (PPTC-012 through PPTC-016), appointment cancellation, delete account
 
 ### Link
 https://github.com/TheBobGottfriedFan/CS310_GROUP03
