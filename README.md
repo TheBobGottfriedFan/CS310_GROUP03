@@ -1,12 +1,15 @@
 # Patient Portal System
  
 ### Authors
-- **Bob / Colton** - Project Lead, Backend, patientportalsystem folder, authentication_service.py, backend.py, db.py, forms.py, models.py, notification_service.py, permissions.py, rbac.py, urls.py, views.py, Database Code, SQL schema, seed data, triggers
+- **Colton / Bob** - Project Lead, Backend, patientportalsystem folder, HTML/CSS frontend, authentication_service.py, backend.py, db.py, forms.py, models.py, notification_service.py, permissions.py, rbac.py, urls.py, views.py, Database Code, SQL schema, seed data, triggers, README
 - **Jeffrey** - UI/UX, HTML/CSS frontend, Sign-in/Logout, urls.py, .env configuration, README
-- **Kendra** - Frontend contributions, testing
-- **Kirubel** - Testing (PPTC-007 through PPTC-011)
-- **Michael** - Testing (PPTC-012 through PPTC-016), appointment cancellation, delete account
- 
+- **Kendra** - Frontend contributions, Contact Doctors Code, testing, README
+- **Michael** - Testing (PPTC-012 through PPTC-016), appointment cancellation, delete account, README
+- **Kirubel** - Testing (PPTC-007 through PPTC-011), unit test seeds
+
+### Link
+https://github.com/TheBobGottfriedFan/CS310_GROUP03
+
 ## Overview
 The GROUP03 Patient Portal is a Django + MySQL web application designed to support healthcare portal functionality. It includes custom SQL-backend authentication, Role-Based Access Control (RBAC), bcrypt password hashing, session validation, notifications, and several patient workflows. The project uses Django for routing and page templates, and interacts with MySQL via mysql.connector for application logic.
  
@@ -44,8 +47,7 @@ The GROUP03 Patient Portal is a Django + MySQL web application designed to suppo
 - Cancel an appointment
 - View appointment details (access controlled per patient)
 - Filter appointments by date range
-- Receive appointment reminders
- 
+   
 ### Messaging
 - Send message to staff
 - View message details
@@ -58,10 +60,6 @@ The GROUP03 Patient Portal is a Django + MySQL web application designed to suppo
 ### Prescriptions
 - Prescription search
 - Request prescription refill
- 
-### Billing & Pharmacy
-- View billing information
-- Change patient pharmacy
  
 ### Privacy & Data
 - View privacy settings
@@ -76,17 +74,10 @@ The GROUP03 Patient Portal is a Django + MySQL web application designed to suppo
 - Role-Based Access Control (RBAC) — patients cannot access staff/doctor routes
 - Appointment detail access control — patients can only view their own appointments
  
-## Stack
-- Python
-- Django
-- MySQL
-- mysql-connector-python
-- bcrypt
-- python-dotenv
-- HTML / CSS
- 
 # How to Install
- 
+
+## Windows
+
 ### 1. Clone the Repository
 Either do:
  
@@ -195,6 +186,9 @@ b. Create a new patient account on the signup page
 a. Login via a seeded user in the seeded SQL files
 
 b. create a new patient account in the sign-up page
+
+
+## Mac
 
 
 # Trademark

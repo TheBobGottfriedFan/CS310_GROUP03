@@ -3,7 +3,7 @@
 {% block content %}
 <div style="max-width:900px; margin:0 auto; background:white; border-radius:24px; border:1.5px solid var(--border); padding:24px;">
   <h1 style="margin:0 0 14px;">Delete Account</h1>
-  <p style="margin:0 0 14px; color:#b91c1c;"><strong>Warning:</strong> WOULD YOU LIKE TO DELETE YOUR ACCOUNT TO REMOVE ALL EVIDENCE PRIOR TO INVESTIGATION? </p>
+  <p style="margin:0 0 14px; color:#b91c1c;"><strong>Warning:</strong> WOULD YOU LIKE TO DELETE YOUR ACCOUNT? </p>
   {% if error %}
     <div style="margin-bottom:14px; padding:12px; border-radius:12px; background:rgba(239,68,68,0.10); border:1px solid rgba(239,68,68,0.18);">
       {{ error }}
@@ -13,7 +13,7 @@
     {% csrf_token %}
     <label style="display:block; margin-bottom:8px;">Type <strong>DELETE</strong> to confirm</label>
     <input type="text" name="confirm_delete" style="width:100%; padding:12px; border:1px solid var(--border); border-radius:12px; margin-bottom:14px;">
-    <button class="btn btn-sm" type="submit">Erase my Account</button>
+    <button class="btn btn-sm" type="submit">ERASE MY ACCOUNT NOW.</button>
   </form>
 </div>
 {% endblock %}
