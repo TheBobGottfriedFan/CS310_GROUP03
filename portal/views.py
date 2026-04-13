@@ -237,6 +237,9 @@ def login_view(request):
     )
     return redirect("portal:dashboard")
 
+def delete_account(request):
+    return render(request, 'delete_account.html')
+
 def _create_upcoming_appointment_reminders(user_id: int) -> None:
     now_naive = timezone.now().replace(tzinfo=None)
     soon_naive = (timezone.now() + timedelta(hours=24)).replace(tzinfo=None)
@@ -725,10 +728,10 @@ def appointments_filtered_view(request):
     """
     params = []
     if role_id == 1:
-        sql += " patient_id = %s "
+        sql += " patient_id = %s AND status != 'cancelled' "
         params.append(user_id)
     else:
-        sql += " provider_id = %s "
+        sql += " provider_id = %s AND status != 'cancelled' "
         params.append(user_id)
     if date_from:
         sql += " AND DATE(start_time) >= %s "
@@ -736,6 +739,7 @@ def appointments_filtered_view(request):
     if date_to:
         sql += " AND DATE(start_time) <= %s "
         params.append(date_to)
+    
     sql += " ORDER BY start_time DESC "
     conn = None
     try:

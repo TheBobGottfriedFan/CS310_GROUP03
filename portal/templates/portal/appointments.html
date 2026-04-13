@@ -61,32 +61,32 @@
     {% if appointments %}
       <div style="display:flex; flex-direction:column; gap:12px;">
         {% for appointment in appointments %}
-          <div style="padding:16px 18px; border:1.5px solid var(--border); border-radius:14px; background:white;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
-              <div>
-                <p style="margin:0 0 6px; font-size:0.82rem; font-weight:800; color:var(--teal-700); text-transform:uppercase;">{{ appointment.appointment_type|default:"Appointment" }}</p>
-                <p style="margin:0; font-size:0.98rem; color:var(--gray-900); font-weight:700;">Appointment #{{ appointment.id }}</p>
-                <p style="margin:8px 0 0; font-size:0.88rem; color:var(--text-muted);">
-                  {{ appointment.start_time }} → {{ appointment.end_time }}
-                </p>
-                <p style="margin:6px 0 0; font-size:0.88rem; color:var(--gray-700);">
-                  Status: <strong>{{ appointment.status }}</strong>
-                </p>
-                {% if appointment.reason %}
-                  <p style="margin:6px 0 0; font-size:0.88rem; color:var(--gray-700);">
-                    Reason: {{ appointment.reason }}
+            <div style="padding:16px 18px; border:1.5px solid var(--border); border-radius:14px; background:white;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+                <div>
+                  <p style="margin:0 0 6px; font-size:0.82rem; font-weight:800; color:var(--teal-700); text-transform:uppercase;">{{ appointment.appointment_type|default:"Appointment" }}</p>
+                  <p style="margin:0; font-size:0.98rem; color:var(--gray-900); font-weight:700;">Appointment #{{ appointment.id }}</p>
+                  <p style="margin:8px 0 0; font-size:0.88rem; color:var(--text-muted);">
+                    {{ appointment.start_time }} → {{ appointment.end_time }}
                   </p>
-                {% endif %}
-              </div>
-              <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-                <a class="btn btn-secondary btn-sm" href="{% url 'portal:appointment_detail' appointment.id %}">View Details</a>
-                <form method="POST" action="{% url 'portal:cancel_appointment' appointment.id %}">
-                  {% csrf_token %}
-                  <button class="btn btn-sm" type="submit">Cancel</button>
-                </form>
+                  <p style="margin:6px 0 0; font-size:0.88rem; color:var(--gray-700);">
+                    Status: <strong>{{ appointment.status }}</strong>
+                  </p>
+                  {% if appointment.reason %}
+                    <p style="margin:6px 0 0; font-size:0.88rem; color:var(--gray-700);">
+                      Reason: {{ appointment.reason }}
+                    </p>
+                  {% endif %}
+                </div>
+                <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                  <a class="btn btn-secondary btn-sm" href="{% url 'portal:appointment_detail' appointment.id %}">View Details</a>
+                  <form method="POST" action="{% url 'portal:cancel_appointment' appointment.id %}">
+                    {% csrf_token %}
+                    <button class="btn btn-sm" type="submit">Cancel</button>
+                  </form>
+                </div>
               </div>
             </div>
-          </div>
         {% endfor %}
       </div>
     {% else %}
