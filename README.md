@@ -76,8 +76,6 @@ The GROUP03 Patient Portal is a Django + MySQL web application designed to suppo
  
 # How to Install
 
-## Windows
-
 ### 1. Clone the Repository
 Either do:
  
@@ -123,7 +121,6 @@ In the root directory, create a file named `.env` and add:
  
 ```
 DJANGO_SECRET_KEY=your_secret_key_here
- 
 DB_NAME=patient_portal
 DB_USER=root
 DB_PASSWORD=your_mysql_password
@@ -150,6 +147,7 @@ DB_PORT=3306
 > A `.env` has been provided for the testing environment.
  
 ### 5. Set Up MySQL Database
+#### Windows
  
 **a. MySQL Workbench (Easier)**
  
@@ -169,17 +167,38 @@ mysql -u your_mysql_user -p patient_portal < seed.sql
 ```
  
 > Replace `your_mysql_user` with your MySQL username.
- 
+
+
+#### Mac
+```
+mysql -u root -p < SQL/00_create_db.sql
+mysql -u root -p patient_portal < SQL/01_schema.sql
+mysql -u root -p patient_portal < SQL/02_seed.sql
+mysql -u root -p patient_portal < SQL/03_triggers.sql
+```
+
 ### 6. Run Django Migrations
+#### Windows
 ```bash
 python manage.py migrate
 ```
- 
+
+#### Mac
+```bash
+python3 manage.py migrate
+```
+
 ### 7. Start the Server
+#### Windows
 ```bash
 python manage.py runserver
 ```
- 
+
+#### Mac
+```bash
+python3 manage.py runserver
+```
+
 ### 8. Access the Application
  
 Open your browser to:
