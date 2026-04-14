@@ -118,11 +118,27 @@ pip install -r requirements.txt
 ```
  
 ### 4. Create `.env` File
+#### Windows
 In the root directory, create a file named `.env` and add:
  
 ```
 DJANGO_SECRET_KEY=your_secret_key_here
  
+DB_NAME=patient_portal
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_HOST=localhost
+DB_PORT=3306
+```
+
+#### Mac
+```
+touch .env
+nano .env
+```
+then paste:
+```
+DJANGO_SECRET_KEY=your_secret_key_here
 DB_NAME=patient_portal
 DB_USER=root
 DB_PASSWORD=your_mysql_password
@@ -187,8 +203,6 @@ a. Login via a seeded user in the seeded SQL files
 
 b. create a new patient account in the sign-up page
 
-
-## Mac
 
 
 # Trademark
