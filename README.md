@@ -222,7 +222,3 @@ a. Login via a seeded user in the seeded SQL files
 
 b. create a new patient account in the sign-up page
 
-
-
-# Trademark
-Durgasoft™
