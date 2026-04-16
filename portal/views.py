@@ -238,7 +238,11 @@ def login_view(request):
     return redirect("portal:dashboard")
 
 def delete_account(request):
-    return render(request, 'delete_account.html')
+    if request.method == "POST":
+        # your delete logic here
+        return redirect("login")
+
+    return render(request, "portal/delete_account.html")
 
 def _create_upcoming_appointment_reminders(user_id: int) -> None:
     now_naive = timezone.now().replace(tzinfo=None)
@@ -422,6 +426,48 @@ def messages_view(request):
     }
     return render(request, "portal/messages.html", context)
 
+
+@require_login
+def dashboard_view(request):
+    user_id = int(request.session["user_id"])
+    _create_upcoming_appointment_reminders(user_id)
+    portal_messages = _get_placeholder_messages()
+
+    conn = None
+    appointments = []
+    prescription_count = 0
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT a.id, a.start_time, a.end_time, a.status, a.reason,
+                   u.first_name, u.last_name
+            FROM appointments a
+            JOIN users u ON u.id = a.provider_id
+            WHERE a.patient_id = %s
+              AND a.status IN ('requested','scheduled')
+              AND a.start_time >= NOW()
+            ORDER BY a.start_time ASC
+            LIMIT 5
+        """, (user_id,))
+        appointments = cur.fetchall()
+        cur.execute("""
+            SELECT COUNT(*) FROM prescriptions WHERE patient_id = %s
+        """, (user_id,))
+        prescription_count = cur.fetchone()[0]
+    finally:
+        if conn:
+            conn.close()
+
+    context = {
+        "username": request.session.get("display_name") or request.session.get("email"),
+        "appointments": appointments,
+        "prescription_count": prescription_count,
+        "portal_messages": portal_messages,
+        "notif_unread_count": get_unread_count(user_id),
+        "notif_preview": list_notifications(user_id, limit=5),
+    }
+    return render(request, "portal/dashboard.html", context)
 
 @require_login
 def data_control_view(request):
