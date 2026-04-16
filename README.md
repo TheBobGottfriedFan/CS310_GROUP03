@@ -114,7 +114,13 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
- 
+
+or
+
+```bash
+pip install django mysql-connector-python bcrypt python-dotenv
+```
+
 ### 4. Create `.env` File
 #### Windows
 In the root directory, create a file named `.env` and add:
