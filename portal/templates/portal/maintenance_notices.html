@@ -1,0 +1,125 @@
+{% extends "portal/base.html" %}
+{% block title %}Maintenance Notices | Patient Portal{% endblock %}
+{% block content %}
+
+<div style="
+  max-width:1100px;
+  margin:0 auto;
+  background:white;
+  border-radius:24px;
+  border:1.5px solid var(--border);
+  box-shadow:0 4px 32px rgba(15,23,42,0.08), 0 0 0 1px rgba(13,148,136,0.07);
+  overflow:hidden;
+">
+
+  <!-- Page header -->
+  <div style="
+    padding:22px 28px;
+    border-bottom:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center;
+    background:linear-gradient(135deg, var(--teal-50) 0%, white 60%);
+  ">
+    <div>
+      <h1 style="font-family:var(--font); font-size:1.5rem; font-weight:900; letter-spacing:-0.03em; color:var(--gray-900); margin:0 0 3px 0;">
+        Maintenance Notices
+      </h1>
+      <p class="muted" style="margin:0; font-size:0.88rem;">System announcements, scheduled downtime, and portal updates.</p>
+    </div>
+    <a class="btn btn-secondary btn-sm" href="{% url 'portal:dashboard' %}">← Back to Dashboard</a>
+  </div>
+
+  <!-- Current status banner -->
+  <div style="padding:16px 28px; background:#f0fdf4; border-bottom:1px solid #bbf7d0; display:flex; align-items:center; gap:12px;">
+    <div style="width:10px; height:10px; background:#16a34a; border-radius:50%; flex-shrink:0;"></div>
+    <p style="font-family:var(--font); font-size:0.87rem; font-weight:700; color:#15803d; margin:0;">All systems operational — no active maintenance windows at this time.</p>
+  </div>
+
+  <!-- Notices list -->
+  <div style="padding:28px; display:flex; flex-direction:column; gap:14px;">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+      <h2 style="font-family:var(--font); font-size:0.8rem; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); margin:0;">Recent Notices</h2>
+      <span style="font-size:0.78rem; color:var(--text-soft);">Showing 4 notices</span>
+    </div>
+
+    <!-- Notice 1 — Completed -->
+    <div style="border:1px solid var(--border); border-radius:14px; overflow:hidden;">
+      <div style="padding:16px 20px; display:flex; align-items:flex-start; justify-content:space-between; gap:16px;">
+        <div style="display:flex; align-items:flex-start; gap:14px;">
+          <div style="width:40px; height:40px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">✅</div>
+          <div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+              <p style="font-family:var(--font); font-size:0.92rem; font-weight:800; color:var(--gray-900); margin:0;">Scheduled Database Maintenance — Completed</p>
+              <span style="display:inline-block; padding:2px 9px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:99px; font-size:0.72rem; font-weight:700; color:#15803d; font-family:var(--font);">Completed</span>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-soft); margin:0 0 8px;">The portal underwent scheduled database maintenance to improve performance and reliability. All services were restored successfully with no data loss.</p>
+            <p style="font-size:0.78rem; color:var(--text-muted); margin:0;">🕐 April 6, 2026 · 2:00 AM – 4:00 AM EST · Affected: All portal services</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notice 2 — Informational -->
+    <div style="border:1px solid var(--border); border-radius:14px; overflow:hidden;">
+      <div style="padding:16px 20px; display:flex; align-items:flex-start; justify-content:space-between; gap:16px;">
+        <div style="display:flex; align-items:flex-start; gap:14px;">
+          <div style="width:40px; height:40px; background:var(--teal-50); border:1px solid var(--teal-200); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">🆕</div>
+          <div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+              <p style="font-family:var(--font); font-size:0.92rem; font-weight:800; color:var(--gray-900); margin:0;">New Feature: Prescription Refill Requests</p>
+              <span style="display:inline-block; padding:2px 9px; background:var(--teal-50); border:1px solid var(--teal-200); border-radius:99px; font-size:0.72rem; font-weight:700; color:var(--teal-700); font-family:var(--font);">Update</span>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-soft); margin:0 0 8px;">You can now request prescription refills directly through the portal. Navigate to Prescriptions from the sidebar to submit a refill request to your provider.</p>
+            <p style="font-size:0.78rem; color:var(--text-muted); margin:0;">📅 March 28, 2026 · Feature Release · Affected: Prescriptions</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notice 3 — Warning/Upcoming -->
+    <div style="border:1px solid #fde68a; border-radius:14px; overflow:hidden; background:#fffbeb;">
+      <div style="padding:16px 20px; display:flex; align-items:flex-start; justify-content:space-between; gap:16px;">
+        <div style="display:flex; align-items:flex-start; gap:14px;">
+          <div style="width:40px; height:40px; background:#fef3c7; border:1px solid #fde68a; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">⚠️</div>
+          <div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+              <p style="font-family:var(--font); font-size:0.92rem; font-weight:800; color:#92400e; margin:0;">Upcoming Maintenance Window</p>
+              <span style="display:inline-block; padding:2px 9px; background:#fef3c7; border:1px solid #fde68a; border-radius:99px; font-size:0.72rem; font-weight:700; color:#92400e; font-family:var(--font);">Upcoming</span>
+            </div>
+            <p style="font-size:0.85rem; color:#a16207; margin:0 0 8px;">The portal will be temporarily unavailable for system upgrades. Please ensure you have noted any upcoming appointments before this window. No data will be lost.</p>
+            <p style="font-size:0.78rem; color:#a16207; margin:0;">🕐 April 20, 2026 · 1:00 AM – 3:00 AM EST · Affected: All portal services</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notice 4 — Security -->
+    <div style="border:1px solid var(--border); border-radius:14px; overflow:hidden;">
+      <div style="padding:16px 20px; display:flex; align-items:flex-start; justify-content:space-between; gap:16px;">
+        <div style="display:flex; align-items:flex-start; gap:14px;">
+          <div style="width:40px; height:40px; background:var(--gray-100); border:1px solid var(--border); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">🔒</div>
+          <div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+              <p style="font-family:var(--font); font-size:0.92rem; font-weight:800; color:var(--gray-900); margin:0;">Privacy Policy Update</p>
+              <span style="display:inline-block; padding:2px 9px; background:var(--gray-100); border:1px solid var(--border); border-radius:99px; font-size:0.72rem; font-weight:700; color:var(--gray-600); font-family:var(--font);">Notice</span>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-soft); margin:0 0 8px;">We have updated our privacy policy to reflect changes in how we handle protected health information (PHI). Your data sharing preferences remain unchanged. Please review the updated policy at your convenience.</p>
+            <p style="font-size:0.78rem; color:var(--text-muted); margin:0;">📅 March 10, 2026 · Policy Update · <a href="{% url 'portal:privacy' %}" style="color:var(--teal-600); text-decoration:none; font-weight:600;">View Privacy Policy →</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Help note -->
+    <div style="background:var(--teal-50); border:1px solid var(--teal-200); border-radius:12px; padding:16px 20px; display:flex; align-items:flex-start; gap:12px; margin-top:6px;">
+      <span style="font-size:1.2rem; flex-shrink:0;">💬</span>
+      <div>
+        <p style="font-family:var(--font); font-size:0.83rem; font-weight:700; color:var(--teal-800); margin:0 0 4px;">Have questions about a notice?</p>
+        <p style="font-size:0.82rem; color:var(--teal-700); margin:0;">If a maintenance window affects an upcoming appointment or you have concerns, please <a href="{% url 'portal:contact' %}" style="color:var(--teal-700); font-weight:700;">contact us</a> or send a secure message through the portal.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

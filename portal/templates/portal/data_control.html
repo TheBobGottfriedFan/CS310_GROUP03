@@ -1,0 +1,212 @@
+{% extends "portal/base.html" %}
+{% block title %}Data Control | Patient Portal{% endblock %}
+{% block content %}
+
+<div style="
+  max-width:1100px;
+  margin:0 auto;
+  background:white;
+  border-radius:24px;
+  border:1.5px solid var(--border);
+  box-shadow:0 4px 32px rgba(15,23,42,0.08), 0 0 0 1px rgba(13,148,136,0.07);
+  overflow:hidden;
+">
+
+  <!-- Page header -->
+  <div style="
+    padding:22px 28px;
+    border-bottom:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:center;
+    background:linear-gradient(135deg, var(--teal-50) 0%, white 60%);
+  ">
+    <div>
+      <h1 style="font-family:var(--font); font-size:1.5rem; font-weight:900; letter-spacing:-0.03em; color:var(--gray-900); margin:0 0 3px 0;">
+        Data Control
+      </h1>
+      <p class="muted" style="margin:0; font-size:0.88rem;">Manage how your health data is stored, shared, and used.</p>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <span style="display:inline-flex; align-items:center; gap:6px; padding:6px 12px; background:var(--teal-50); border:1px solid var(--teal-200); border-radius:8px; font-size:0.78rem; font-weight:700; color:var(--teal-700); font-family:var(--font);">🔒 HIPAA Protected</span>
+      <a class="btn btn-secondary btn-sm" href="{% url 'portal:dashboard' %}">← Back to Dashboard</a>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div style="padding:28px; display:flex; flex-direction:column; gap:20px;">
+
+    <!-- Data Sharing Preferences -->
+    <div style="border:1px solid var(--border); border-radius:14px; overflow:hidden;">
+      <div style="padding:16px 20px; background:var(--teal-50); border-bottom:1px solid var(--teal-200); display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1rem;">🔗</span>
+        <h3 style="font-family:var(--font); font-size:0.92rem; font-weight:800; color:var(--teal-800); margin:0;">Data Sharing Preferences</h3>
+      </div>
+
+      <!-- Share with providers -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--gray-100);">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="width:38px; height:38px; background:var(--teal-50); border:1px solid var(--teal-200); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">🩺</div>
+          <div>
+            <p style="font-family:var(--font); font-size:0.88rem; font-weight:700; color:var(--gray-900); margin:0 0 3px;">Share with care providers</p>
+            <p style="font-size:0.8rem; color:var(--text-soft); margin:0;">Allow your providers to access your health records and visit history</p>
+          </div>
+        </div>
+        <label style="display:flex; align-items:center; cursor:pointer;">
+          <input type="checkbox" id="share-providers" checked style="display:none;">
+          <div id="toggle-providers" onclick="toggleSwitch('providers')" style="width:44px; height:24px; background:var(--teal-500); border-radius:99px; position:relative; cursor:pointer; transition:background 0.2s;">
+            <div id="knob-providers" style="width:18px; height:18px; background:white; border-radius:50%; position:absolute; top:3px; left:23px; transition:left 0.2s;"></div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Share for research -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--gray-100);">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="width:38px; height:38px; background:#e6f1fb; border:1px solid #b5d4f4; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">🔬</div>
+          <div>
+            <p style="font-family:var(--font); font-size:0.88rem; font-weight:700; color:var(--gray-900); margin:0 0 3px;">Share for medical research</p>
+            <p style="font-size:0.8rem; color:var(--text-soft); margin:0;">Allow anonymized data to be used for approved research studies</p>
+          </div>
+        </div>
+        <label style="display:flex; align-items:center; cursor:pointer;">
+          <input type="checkbox" id="share-research" style="display:none;">
+          <div id="toggle-research" onclick="toggleSwitch('research')" style="width:44px; height:24px; background:var(--gray-200); border-radius:99px; position:relative; cursor:pointer; transition:background 0.2s;">
+            <div id="knob-research" style="width:18px; height:18px; background:white; border-radius:50%; position:absolute; top:3px; left:3px; transition:left 0.2s;"></div>
+          </div>
+        </label>
+      </div>
+
+      <!-- Share with pharmacy -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px;">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="width:38px; height:38px; background:#faeeda; border:1px solid #fac775; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">💊</div>
+          <div>
+            <p style="font-family:var(--font); font-size:0.88rem; font-weight:700; color:var(--gray-900); margin:0 0 3px;">Share with pharmacy</p>
+            <p style="font-size:0.8rem; color:var(--text-soft); margin:0;">Allow prescription data to be shared with your preferred pharmacy</p>
+          </div>
+        </div>
+        <label style="display:flex; align-items:center; cursor:pointer;">
+          <input type="checkbox" id="share-pharmacy" checked style="display:none;">
+          <div id="toggle-pharmacy" onclick="toggleSwitch('pharmacy')" style="width:44px; height:24px; background:var(--teal-500); border-radius:99px; position:relative; cursor:pointer; transition:background 0.2s;">
+            <div id="knob-pharmacy" style="width:18px; height:18px; background:white; border-radius:50%; position:absolute; top:3px; left:23px; transition:left 0.2s;"></div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Communication Preferences -->
+    <div style="border:1px solid var(--border); border-radius:14px; overflow:hidden;">
+      <div style="padding:16px 20px; background:var(--teal-50); border-bottom:1px solid var(--teal-200); display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1rem;">📬</span>
+        <h3 style="font-family:var(--font); font-size:0.92rem; font-weight:800; color:var(--teal-800); margin:0;">Communication Preferences</h3>
+      </div>
+
+      <!-- Email -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--gray-100);">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="width:38px; height:38px; background:var(--teal-50); border:1px solid var(--teal-200); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">✉️</div>
+          <div>
+            <p style="font-family:var(--font); font-size:0.88rem; font-weight:700; color:var(--gray-900); margin:0 0 3px;">Email notifications</p>
+            <p style="font-size:0.8rem; color:var(--text-soft); margin:0;">Receive appointment reminders and portal updates via email</p>
+          </div>
+        </div>
+        <label style="display:flex; align-items:center; cursor:pointer;">
+          <input type="checkbox" id="share-email" checked style="display:none;">
+          <div id="toggle-email" onclick="toggleSwitch('email')" style="width:44px; height:24px; background:var(--teal-500); border-radius:99px; position:relative; cursor:pointer; transition:background 0.2s;">
+            <div id="knob-email" style="width:18px; height:18px; background:white; border-radius:50%; position:absolute; top:3px; left:23px; transition:left 0.2s;"></div>
+          </div>
+        </label>
+      </div>
+
+      <!-- SMS -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px;">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="width:38px; height:38px; background:var(--gray-100); border:1px solid var(--border); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">📱</div>
+          <div>
+            <p style="font-family:var(--font); font-size:0.88rem; font-weight:700; color:var(--gray-900); margin:0 0 3px;">SMS notifications</p>
+            <p style="font-size:0.8rem; color:var(--text-soft); margin:0;">Receive text message reminders for upcoming appointments</p>
+          </div>
+        </div>
+        <label style="display:flex; align-items:center; cursor:pointer;">
+          <input type="checkbox" id="share-sms" style="display:none;">
+          <div id="toggle-sms" onclick="toggleSwitch('sms')" style="width:44px; height:24px; background:var(--gray-200); border-radius:99px; position:relative; cursor:pointer; transition:background 0.2s;">
+            <div id="knob-sms" style="width:18px; height:18px; background:white; border-radius:50%; position:absolute; top:3px; left:3px; transition:left 0.2s;"></div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Your Data -->
+    <div style="border:1px solid var(--border); border-radius:14px; overflow:hidden;">
+      <div style="padding:16px 20px; background:var(--teal-50); border-bottom:1px solid var(--teal-200); display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1rem;">🗂️</span>
+        <h3 style="font-family:var(--font); font-size:0.92rem; font-weight:800; color:var(--teal-800); margin:0;">Your Data</h3>
+      </div>
+
+      <!-- Download -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--gray-100);">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="width:38px; height:38px; background:var(--teal-50); border:1px solid var(--teal-200); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">📥</div>
+          <div>
+            <p style="font-family:var(--font); font-size:0.88rem; font-weight:700; color:var(--gray-900); margin:0 0 3px;">Download your data</p>
+            <p style="font-size:0.8rem; color:var(--text-soft); margin:0;">Export a copy of all your health records and account data as a file</p>
+          </div>
+        </div>
+        <a href="#" style="display:inline-flex; align-items:center; gap:5px; padding:7px 14px; background:var(--teal-50); border:1px solid var(--teal-200); border-radius:8px; font-size:0.78rem; font-weight:700; color:var(--teal-700); text-decoration:none; font-family:var(--font);">Request Export →</a>
+      </div>
+
+      <!-- View login history -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--gray-100);">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="width:38px; height:38px; background:var(--gray-100); border:1px solid var(--border); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">🕓</div>
+          <div>
+            <p style="font-family:var(--font); font-size:0.88rem; font-weight:700; color:var(--gray-900); margin:0 0 3px;">Login history</p>
+            <p style="font-size:0.8rem; color:var(--text-soft); margin:0;">View a log of recent account access and login activity</p>
+          </div>
+        </div>
+        <a href="{% url 'portal:settings' %}" style="display:inline-flex; align-items:center; gap:5px; padding:7px 14px; background:var(--gray-100); border:1px solid var(--border); border-radius:8px; font-size:0.78rem; font-weight:700; color:var(--gray-700); text-decoration:none; font-family:var(--font);">View History →</a>
+      </div>
+
+      <!-- Delete account -->
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px;">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div style="width:38px; height:38px; background:#fff5f5; border:1px solid #fecaca; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">🗑️</div>
+          <div>
+            <p style="font-family:var(--font); font-size:0.88rem; font-weight:700; color:var(--gray-900); margin:0 0 3px;">Delete your account</p>
+            <p style="font-size:0.8rem; color:#dc2626; margin:0;">Permanently remove all your data from the portal. This cannot be undone.</p>
+          </div>
+        </div>
+        <a href="{% url 'portal:delete_account' %}" style="display:inline-flex; align-items:center; gap:5px; padding:7px 14px; background:#fff5f5; border:1px solid #fecaca; border-radius:8px; font-size:0.78rem; font-weight:700; color:#dc2626; text-decoration:none; font-family:var(--font);">Delete Account →</a>
+      </div>
+    </div>
+
+    <!-- HIPAA notice -->
+    <div style="background:var(--teal-50); border:1px solid var(--teal-200); border-radius:12px; padding:16px 20px; display:flex; align-items:flex-start; gap:12px;">
+      <span style="font-size:1.2rem; flex-shrink:0;">🔒</span>
+      <div>
+        <p style="font-family:var(--font); font-size:0.83rem; font-weight:700; color:var(--teal-800); margin:0 0 4px;">Your data is protected under HIPAA</p>
+        <p style="font-size:0.82rem; color:var(--teal-700); margin:0;">We are committed to protecting your protected health information (PHI). Your data is never sold to third parties. All sharing preferences apply only to your direct care team and approved partners.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function toggleSwitch(name) {
+    var toggle = document.getElementById('toggle-' + name);
+    var knob = document.getElementById('knob-' + name);
+    var checkbox = document.getElementById('share-' + name);
+    var isOn = checkbox.checked;
+    if (isOn) {
+      checkbox.checked = false;
+      toggle.style.background = 'var(--gray-200)';
+      knob.style.left = '3px';
+    } else {
+      checkbox.checked = true;
+      toggle.style.background = 'var(--teal-500)';
+      knob.style.left = '23px';
+    }
+  }
+</script>
+
+{% endblock %}
