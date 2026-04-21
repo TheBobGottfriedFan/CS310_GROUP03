@@ -684,7 +684,7 @@ def request_appointment_view(request):
     finally:
         if conn:
             conn.close()
-    messages.success(request, "APPOINTMENT SUCCESSFULLY SCHEDULED, KINDLY SEND 1 LAKH.")
+    messages.success(request, "APPOINTMENT SUCCESSFULLY SCHEDULED")
     return redirect("portal:appointment_detail", appointment_id=appointment_id)
 
 @require_permission(CANCEL_APPOINTMENT)
