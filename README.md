@@ -151,6 +151,7 @@ DB_PORT=3306
  
 > **Note:** See requirements.txt for instructions on generating a DJANGO_SECRET_KEY.
 > A `.env` has been provided for the testing environment.
+> **Also:** Update to your MySQL password in portal/db.py [ password="Mookie123*" ]
  
 ### 5. Set Up MySQL Database
 #### Windows
