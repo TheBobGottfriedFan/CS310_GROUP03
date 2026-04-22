@@ -8,6 +8,8 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
     path("signup/", views.signup_view, name="signup"),
     path("dashboard/", views.dashboard_view, name="dashboard"),
+    path("dashboard/doctor/", views.doctor_dashboard_view, name="doctor_dashboard"),
+    path("dashboard/admin/", views.admin_dashboard_view, name="admin_dashboard"),
     path("settings/", views.settings_view, name="settings"),
     path("privacy/", views.privacy_view, name="privacy"),
     path("messages/", views.messages_view, name="messages"),
@@ -55,7 +57,7 @@ urlpatterns = [
     path("messages/<int:message_id>/", views.message_detail_view, name="message_detail"),
 
     path("account-deactivation/", views.account_deactivation_view, name="account_deactivation"),
-    path("delete-account/", views.delete_account, name="delete_account"),
+    path("delete-account/", views.delete_account_view, name="delete_account"),
 
     path(
         "patient/insurance/<int:patient_id>/manage/",

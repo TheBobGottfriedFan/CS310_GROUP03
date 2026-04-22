@@ -235,14 +235,15 @@ def login_view(request):
         session_token=request.session.session_key,
         hours_valid=2,
     )
-    return redirect("portal:dashboard")
+    role_id_int = int(sql_role_id)
+    if role_id_int == 2:  # doctor
+        return redirect("portal:doctor_dashboard")
+    elif role_id_int == 6:  # administrator
+        return redirect("portal:admin_dashboard")
+    else:
+        return redirect("portal:dashboard")
 
-def delete_account(request):
-    if request.method == "POST":
-        # your delete logic here
-        return redirect("login")
 
-    return render(request, "portal/delete_account.html")
 
 def _create_upcoming_appointment_reminders(user_id: int) -> None:
     now_naive = timezone.now().replace(tzinfo=None)
@@ -288,48 +289,6 @@ def _create_upcoming_appointment_reminders(user_id: int) -> None:
     finally:
         if conn:
             conn.close()
-
-@require_login
-def dashboard_view(request):
-    user_id = int(request.session["user_id"])
-    _create_upcoming_appointment_reminders(user_id)
-    portal_messages = _get_placeholder_messages()
-
-    conn = None
-    appointments = []
-    prescription_count = 0
-    try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("""
-            SELECT a.id, a.start_time, a.end_time, a.status, a.reason,
-                   u.first_name, u.last_name
-            FROM appointments a
-            JOIN users u ON u.id = a.provider_id
-            WHERE a.patient_id = %s
-              AND a.status IN ('requested','scheduled')
-              AND a.start_time >= NOW()
-            ORDER BY a.start_time ASC
-            LIMIT 5
-        """, (user_id,))
-        appointments = cur.fetchall()
-        cur.execute("""
-            SELECT COUNT(*) FROM prescriptions WHERE patient_id = %s
-        """, (user_id,))
-        prescription_count = cur.fetchone()[0]
-    finally:
-        if conn:
-            conn.close()
-
-    context = {
-        "username": request.session.get("display_name") or request.session.get("email"),
-        "appointments": appointments,
-        "prescription_count": prescription_count,
-        "portal_messages": portal_messages,
-        "notif_unread_count": get_unread_count(user_id),
-        "notif_preview": list_notifications(user_id, limit=5),
-    }
-    return render(request, "portal/dashboard.html", context)
 
 @require_login
 def logout_view(request):
@@ -678,7 +637,7 @@ def request_appointment_view(request):
             INSERT INTO notifications (user_id, category, message)
             VALUES (%s, 'appointment', %s)
             """,
-            (int(slot["provider_id"]), f"APPOINTMENT ID: #{appointment_id} SCHEDULED."),
+            (int(slot["provider_id"]), f"Appointment #{appointment_id} has been scheduled."),
         )
         conn.commit()
     finally:
@@ -2127,6 +2086,71 @@ def delete_account_view(request):
             "username": request.session.get("display_name") or request.session.get("email"),
         },
     )
+@require_login
+def doctor_dashboard_view(request):
+    if int(request.session.get("role_id", 0)) != 2:
+        return redirect("portal:dashboard")
+    user_id = int(request.session["user_id"])
+    conn = None
+    appointments = []
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT a.id, a.patient_id, a.provider_id, a.appointment_type,
+                   a.start_time, a.end_time, a.status, a.reason
+            FROM appointments a
+            WHERE a.provider_id = %s
+              AND a.status IN ('requested','scheduled')
+              AND a.start_time >= NOW()
+            ORDER BY a.start_time ASC
+            LIMIT 10
+        """, (user_id,))
+        appointments = cur.fetchall()
+    finally:
+        if conn:
+            conn.close()
+    return render(request, "portal/doctor_dashboard.html", {
+        "username": request.session.get("display_name") or request.session.get("email"),
+        "appointments": appointments,
+        "notif_unread_count": get_unread_count(user_id),
+    })
+
+
+@require_login
+def admin_dashboard_view(request):
+    if int(request.session.get("role_id", 0)) != 6:
+        return redirect("portal:dashboard")
+    conn = None
+    users = []
+    total_users = active_users = total_appointments = 0
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute("""
+            SELECT u.id, u.email, u.first_name, u.last_name,
+                   u.is_active, u.created_at, r.name as role_name
+            FROM users u
+            LEFT JOIN roles r ON r.id = u.role_id
+            ORDER BY u.id ASC
+        """)
+        users = cur.fetchall()
+        total_users = len(users)
+        active_users = sum(1 for u in users if u["is_active"])
+        cur.execute("SELECT COUNT(*) as cnt FROM appointments")
+        total_appointments = cur.fetchone()["cnt"]
+    finally:
+        if conn:
+            conn.close()
+    return render(request, "portal/admin_dashboard.html", {
+        "username": request.session.get("display_name") or request.session.get("email"),
+        "users": users,
+        "total_users": total_users,
+        "active_users": active_users,
+        "total_appointments": total_appointments,
+    })
+
+
 @require_login
 def contact(request):
     return render(request, 'portal/contact.html')
