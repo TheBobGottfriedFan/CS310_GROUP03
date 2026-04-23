@@ -222,6 +222,9 @@ You can either:
 a. Login via a seeded user from the SQL seed files
  
 b. Create a new patient account on the signup page
+
+### Kindly Note
+The User MUST manually set their role permissions if they wish to become A doctor or an admin.
  
 ---
 
