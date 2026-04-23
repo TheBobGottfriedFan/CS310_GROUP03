@@ -231,4 +231,4 @@ b. create a new patient account in the sign-up page
 
 
 ### Kindly Note
-The User MUST manually set their role permissions if they wish to become A doctor or an admin.
+The User MUST manually set their role permissions (either in the admin panel or in the database) if they wish to become A doctor or an admin.
