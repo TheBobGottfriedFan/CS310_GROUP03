@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings | Admin Portal</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #1a202c; }
+        .topbar {
+            background: #2d3748; color: white;
+            padding: 14px 32px; display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        .topbar h1 { font-size: 1.2rem; font-weight: 600; letter-spacing: 0.5px; }
+        .topbar .user-info { font-size: 0.9rem; display: flex; align-items: center; gap: 16px; }
+        .topbar a { color: #90cdf4; text-decoration: none; font-size: 0.85rem; }
+        .topbar a:hover { text-decoration: underline; }
+        .badge { background: #4a5568; border-radius: 12px; padding: 2px 10px; font-size: 0.75rem; }
+        .container { max-width: 1100px; margin: 32px auto; padding: 0 24px; }
+        .back-link { display: inline-block; margin-bottom: 18px; color: #2d3748; text-decoration: none; font-size: 0.88rem; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+        .section { background: white; border-radius: 12px; padding: 28px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .section-title { font-size: 1rem; font-weight: 600; color: #2d3748; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+        .col-heading { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #718096; margin-bottom: 14px; }
+        .info-row { display: grid; grid-template-columns: 110px 1fr; padding: 10px 0; border-bottom: 1px solid #f7fafc; }
+        .info-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; color: #718096; }
+        .info-value { font-weight: 600; color: #2d3748; word-break: break-word; font-size: 0.9rem; }
+        label { display: block; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #4a5568; margin: 14px 0 6px; }
+        input { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 8px; font: inherit; background: #f7fafc; }
+        .btn-primary { background: #2d3748; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; font-weight: 600; cursor: pointer; width: 100%; margin-top: 16px; }
+        .btn-primary:hover { background: #1a202c; }
+        .alert-error { background: #fff5f5; border: 1px solid #fc8181; border-radius: 8px; padding: 11px 14px; color: #c53030; font-size: 0.88rem; margin-bottom: 14px; }
+        .alert-success { background: #f0fff4; border: 1px solid #9ae6b4; border-radius: 8px; padding: 11px 14px; color: #276749; font-size: 0.88rem; margin-bottom: 14px; }
+        .notif-toggle { display: flex; align-items: center; justify-content: space-between; padding: 13px 15px; background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; }
+        .notif-toggle p { margin: 0; font-size: 0.88rem; font-weight: 600; color: #2d3748; }
+        .notif-toggle small { font-size: 0.78rem; color: #718096; }
+        .notif-note { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 14px; font-size: 0.83rem; color: #92400e; margin-top: 10px; }
+    </style>
+</head>
+<body>
+<div class="topbar">
+    <h1>⚙️ Herd Patient Portal — Administrator</h1>
+    <div class="user-info">
+        <span>{{ username }} <span class="badge">Administrator</span></span>
+        <a href="{% url 'portal:logout' %}">Log Out</a>
+    </div>
+</div>
+
+<div class="container">
+    <a class="back-link" href="{% url 'portal:admin_dashboard' %}">&larr; Back to Dashboard</a>
+
+    <div class="section">
+        <h3 class="section-title">⚙️ Account Settings</h3>
+        <div class="two-col">
+
+            <!-- Left: Profile + Password -->
+            <div>
+                <p class="col-heading">Profile Info</p>
+                <div class="info-row">
+                    <span class="info-label">Name</span>
+                    <span class="info-value">{{ username }}</span>
+                </div>
+                <div class="info-row" style="border-bottom:none;">
+                    <span class="info-label">Email</span>
+                    <span class="info-value">{{ request.session.email }}</span>
+                </div>
+
+                <p class="col-heading" style="margin-top:24px;">🔐 Change Password</p>
+
+                {% if pw_error %}
+                <div class="alert-error">⚠️ {{ pw_error }}</div>
+                {% endif %}
+                {% if pw_success %}
+                <div class="alert-success">✅ {{ pw_success }}</div>
+                {% endif %}
+
+                <form method="POST" autocomplete="off">
+                    {% csrf_token %}
+                    <label for="current_password">Current Password</label>
+                    <input id="current_password" type="password" name="current_password" placeholder="Enter current password" />
+                    <label for="new_password">New Password</label>
+                    <input id="new_password" type="password" name="new_password" placeholder="At least 9 characters" />
+                    <label for="confirm_password">Confirm New Password</label>
+                    <input id="confirm_password" type="password" name="confirm_password" placeholder="Re-enter new password" />
+                    <button class="btn-primary" type="submit">🔑 Update Password</button>
+                </form>
+            </div>
+
+            <!-- Right: Notifications -->
+            <div>
+                <p class="col-heading">🔔 Notification Preferences</p>
+                <p style="font-size:0.88rem; color:#718096; margin-bottom:16px; line-height:1.6;">Choose how you'd like to be notified.</p>
+                <div class="notif-toggle">
+                    <div>
+                        <p>System alert emails</p>
+                        <small>Receive notifications for system events</small>
+                    </div>
+                    <input type="checkbox" checked style="width:18px;height:18px;accent-color:#2d3748;" />
+                </div>
+                <div class="notif-toggle">
+                    <div>
+                        <p>User activity alerts</p>
+                        <small>Notify on new registrations or role changes</small>
+                    </div>
+                    <input type="checkbox" checked style="width:18px;height:18px;accent-color:#2d3748;" />
+                </div>
+                <div class="notif-note">⚠️ Notification preferences are display-only.</div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

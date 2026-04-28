@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Users | Admin Portal</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #1a202c; }
+        .topbar {
+            background: #2d3748; color: white;
+            padding: 14px 32px; display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        .topbar h1 { font-size: 1.2rem; font-weight: 600; letter-spacing: 0.5px; }
+        .topbar .user-info { font-size: 0.9rem; display: flex; align-items: center; gap: 16px; }
+        .topbar a { color: #90cdf4; text-decoration: none; font-size: 0.85rem; }
+        .topbar a:hover { text-decoration: underline; }
+        .badge { background: #4a5568; border-radius: 12px; padding: 2px 10px; font-size: 0.75rem; }
+        .container { max-width: 1100px; margin: 32px auto; padding: 0 24px; }
+        .back-link { display: inline-block; margin-bottom: 18px; color: #2d3748; text-decoration: none; font-size: 0.88rem; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+        .section { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+        .section-header h3 { font-size: 1rem; font-weight: 600; color: #2d3748; }
+        .section-header .count { font-size: 0.85rem; color: #718096; font-weight: 600; }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }
+        .stat-card {
+            background: white; border-radius: 12px;
+            padding: 20px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            border-left: 4px solid #2d3748;
+        }
+        .stat-card h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: #718096; margin-bottom: 8px; }
+        .stat-card .value { font-size: 2rem; font-weight: 700; color: #1a202c; }
+        .stat-card .sub { font-size: 0.8rem; color: #a0aec0; margin-top: 4px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th {
+            text-align: left; padding: 9px 12px;
+            color: #718096; font-weight: 600;
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        td { padding: 10px 12px; border-top: 1px solid #f7fafc; color: #2d3748; }
+        tr:hover td { background: #f7fafc; }
+        .role-badge {
+            display: inline-block; padding: 2px 10px;
+            border-radius: 10px; font-size: 0.75rem; font-weight: 600;
+            background: #e2e8f0; color: #4a5568;
+        }
+        .role-badge.doctor { background: #c6f6d5; color: #276749; }
+        .role-badge.admin { background: #bee3f8; color: #2b6cb0; }
+        .role-badge.patient { background: #fefcbf; color: #744210; }
+        .active-yes { color: #276749; font-weight: 600; }
+        .active-no { color: #c53030; font-weight: 600; }
+        .empty { text-align: center; padding: 40px 0; color: #a0aec0; font-size: 0.9rem; }
+        .id-cell { color: #a0aec0; font-size: 0.85rem; font-family: monospace; }
+        .email-cell { font-weight: 600; color: #1a202c; }
+        .name-cell { color: #4a5568; }
+        .date-cell { color: #718096; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+<div class="topbar">
+    <h1>⚙️ Herd Patient Portal — Administrator</h1>
+    <div class="user-info">
+        <span>{{ username }} <span class="badge">Administrator</span></span>
+        <a href="{% url 'portal:logout' %}">Log Out</a>
+    </div>
+</div>
+
+<div class="container">
+    <a class="back-link" href="{% url 'portal:admin_dashboard' %}">&larr; Back to Dashboard</a>
+
+    <div class="stats">
+        <div class="stat-card">
+            <h3>Total Users</h3>
+            <div class="value">{{ users|length }}</div>
+            <div class="sub">Registered accounts</div>
+        </div>
+        <div class="stat-card">
+            <h3>Active Users</h3>
+            <div class="value">{{ active_users }}</div>
+            <div class="sub">is_active = 1</div>
+        </div>
+        <div class="stat-card">
+            <h3>Role</h3>
+            <div class="value" style="font-size:1.1rem; padding-top:10px;">Administrator</div>
+            <div class="sub">Full system access</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h3>All Users</h3>
+            <span class="count">{{ users|length }} total</span>
+        </div>
+
+        {% if users %}
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Email</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th>Active</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in users %}
+                <tr>
+                    <td class="id-cell">#{{ u.id }}</td>
+                    <td class="email-cell">{{ u.email }}</td>
+                    <td class="name-cell">
+                        {% if u.first_name or u.last_name %}
+                            {{ u.first_name }} {{ u.last_name }}
+                        {% else %}
+                            <span style="color:#a0aec0;">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="role-badge {% if u.role_name == 'doctor' %}doctor{% elif u.role_name == 'administrator' %}admin{% elif u.role_name == 'patient' %}patient{% endif %}">
+                            {{ u.role_name|default:"—" }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if u.is_active %}
+                            <span class="active-yes">Yes</span>
+                        {% else %}
+                            <span class="active-no">No</span>
+                        {% endif %}
+                    </td>
+                    <td class="date-cell">{{ u.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty">No users found.</div>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,141 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Appointments | Doctor Portal</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #1a202c; }
+        .topbar {
+            background: #1a6b4a; color: white;
+            padding: 14px 32px; display: flex;
+            justify-content: space-between; align-items: center;
+        }
+        .topbar h1 { font-size: 1.2rem; font-weight: 600; letter-spacing: 0.5px; }
+        .topbar .user-info { font-size: 0.9rem; display: flex; align-items: center; gap: 16px; }
+        .topbar a { color: #a7f3d0; text-decoration: none; font-size: 0.85rem; }
+        .topbar a:hover { text-decoration: underline; }
+        .badge { background: #065f46; border-radius: 12px; padding: 2px 10px; font-size: 0.75rem; }
+        .container { max-width: 1100px; margin: 32px auto; padding: 0 24px; }
+        .back-link { display: inline-block; margin-bottom: 18px; color: #1a6b4a; text-decoration: none; font-size: 0.88rem; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+        .page-header { margin-bottom: 24px; }
+        .page-header h2 { font-size: 1.5rem; font-weight: 700; color: #1a6b4a; }
+        .page-header p { color: #4a5568; margin-top: 4px; font-size: 0.95rem; }
+        .section { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .section h3 { font-size: 1rem; font-weight: 600; color: #1a6b4a; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px; }
+        .filter-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 14px; }
+        .filter-form label { display: block; font-size: 0.8rem; font-weight: 700; color: #4a5568; margin-bottom: 6px; }
+        .filter-form input { width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; font: inherit; }
+        .btn {
+            background: #1a6b4a; color: white; border: none; cursor: pointer;
+            padding: 10px 20px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+            text-decoration: none; display: inline-block; transition: background 0.2s;
+        }
+        .btn:hover { background: #145c3d; }
+        .btn-align-end { display: flex; align-items: flex-end; }
+        .appt-list { display: flex; flex-direction: column; gap: 12px; }
+        .appt-card { padding: 16px 18px; border: 1.5px solid #e2e8f0; border-radius: 12px; background: white; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+        .appt-type { font-size: 0.78rem; font-weight: 800; color: #1a6b4a; text-transform: uppercase; margin-bottom: 4px; }
+        .appt-id { font-size: 0.98rem; font-weight: 700; color: #1a202c; }
+        .appt-meta { font-size: 0.88rem; color: #4a5568; margin-top: 6px; }
+        .appt-meta strong { color: #1a202c; }
+        .status { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; }
+        .status-scheduled { background: #c6f6d5; color: #276749; }
+        .status-requested { background: #bee3f8; color: #2b6cb0; }
+        .status-cancelled { background: #fed7d7; color: #c53030; }
+        .appt-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .btn-secondary { background: white; color: #1a6b4a; border: 1.5px solid #1a6b4a; }
+        .btn-secondary:hover { background: #f0fdf4; }
+        .cancel-btn { background: #fed7d7; color: #9b2c2c; border: none; cursor: pointer; padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; transition: background 0.2s; }
+        .cancel-btn:hover { background: #feb2b2; }
+        .empty { text-align: center; padding: 56px 20px; color: #a0aec0; }
+        .empty-icon { font-size: 3.5rem; margin-bottom: 14px; }
+        .empty p { font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+<div class="topbar">
+    <h1>🏥 Herd Patient Portal — Doctor</h1>
+    <div class="user-info">
+        <span>Dr. {{ username }} <span class="badge">Doctor</span></span>
+        <a href="{% url 'portal:doctor_dashboard' %}">Dashboard</a>
+        <a href="{% url 'portal:logout' %}">Log Out</a>
+    </div>
+</div>
+
+<div class="container">
+    <a class="back-link" href="{% url 'portal:doctor_dashboard' %}">&larr; Back to Dashboard</a>
+
+    <div class="page-header">
+        <h2>Appointments</h2>
+        <p>View and manage your patient appointments.</p>
+    </div>
+
+    {% if messages %}
+    {% for msg in messages %}
+    <div style="background:#c6f6d5; border:1px solid #9ae6b4; border-radius:8px; padding:12px 16px; color:#276749; font-size:0.88rem; margin-bottom:16px;">{{ msg }}</div>
+    {% endfor %}
+    {% endif %}
+
+    <div class="section">
+        <h3>Filter Appointments</h3>
+        <form method="GET" action="{% url 'portal:appointments_filtered' %}" class="filter-form">
+            <div>
+                <label>From</label>
+                <input type="date" name="date_from" value="{{ request.GET.date_from }}">
+            </div>
+            <div>
+                <label>To</label>
+                <input type="date" name="date_to" value="{{ request.GET.date_to }}">
+            </div>
+            <div class="btn-align-end">
+                <button class="btn" type="submit">Filter</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="section">
+        <h3>Appointment List ({{ appointments|length }} total)</h3>
+        {% if appointments %}
+        <div class="appt-list">
+            {% for appt in appointments %}
+            <div class="appt-card">
+                <div>
+                    <p class="appt-type">{{ appt.appointment_type|default:"Appointment" }}</p>
+                    <p class="appt-id">Appointment #{{ appt.id }}</p>
+                    <p class="appt-meta">{{ appt.start_time }} &rarr; {{ appt.end_time }}</p>
+                    <p class="appt-meta">
+                        Status: <strong>
+                            <span class="status {% if appt.status == 'scheduled' %}status-scheduled{% elif appt.status == 'requested' %}status-requested{% else %}status-cancelled{% endif %}">
+                                {{ appt.status }}
+                            </span>
+                        </strong>
+                    </p>
+                    <p class="appt-meta">Patient ID: <strong>{{ appt.patient_id }}</strong></p>
+                    {% if appt.reason %}
+                    <p class="appt-meta">Reason: {{ appt.reason }}</p>
+                    {% endif %}
+                </div>
+                <div class="appt-actions">
+                    <a class="btn btn-secondary" href="{% url 'portal:appointment_detail' appt.id %}">View Details</a>
+                    <form method="POST" action="{% url 'portal:cancel_appointment' appt.id %}">
+                        {% csrf_token %}
+                        <button class="cancel-btn" type="submit">Cancel</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty">
+            <div class="empty-icon">📭</div>
+            <p>No appointments found.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>

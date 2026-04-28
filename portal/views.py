@@ -57,16 +57,16 @@ def _get_client_ip(request) -> str:
 def _get_placeholder_messages() -> list[dict]:
     return [
         {
-            "subject": "Welcome to the Black Mesa Herd Patient Portal",
+            "subject": "Welcome to the Herd Patient Portal",
             "from": "Portal Support",
             "date": "Today",
-            "preview": "This is a Inbox. Inbox. INBOX.",
+            "preview": "Your account is set up and ready. You can message your care team, view prescriptions, and manage appointments from your dashboard.",
         },
         {
-            "subject": "Appointment Reminder",
+            "subject": "Upcoming Appointment Reminder",
             "from": "Care Team",
             "date": "Yesterday",
-            "preview": "Reminder: This is a Placeholder. Placeholder. PLACEHOLDER.",
+            "preview": "This is a reminder that you have an upcoming appointment scheduled. Please log in to view the details or request changes.",
         },
     ]
 
@@ -303,6 +303,13 @@ def logout_view(request):
 @require_login
 @require_http_methods(["GET", "POST"])
 def settings_view(request):
+    role_id = int(request.session.get("role_id", 0))
+    if role_id == 2:
+        settings_template = "portal/doctor_settings.html"
+    elif role_id == 6:
+        settings_template = "portal/admin_settings.html"
+    else:
+        settings_template = "portal/settings.html"
     username = request.session.get("display_name") or request.session.get("email")
     context = {"username": username}
     if request.method == "POST":
@@ -311,13 +318,13 @@ def settings_view(request):
         confirm_password = request.POST.get("confirm_password", "").strip()
         if not current_password or not new_password or not confirm_password:
             context["pw_error"] = "All password fields are required."
-            return render(request, "portal/settings.html", context)
+            return render(request, settings_template, context)
         if new_password != confirm_password:
             context["pw_error"] = "New passwords do not match."
-            return render(request, "portal/settings.html", context)
+            return render(request, settings_template, context)
         if len(new_password) < 9:
             context["pw_error"] = "New password must be at least 9 characters."
-            return render(request, "portal/settings.html", context)
+            return render(request, settings_template, context)
         email = (request.session.get("email") or "").strip().lower()
         conn = None
         try:
@@ -338,7 +345,7 @@ def settings_view(request):
                 conn.close()
         if not row:
             context["pw_error"] = "User has not been found."
-            return render(request, "portal/settings.html", context)
+            return render(request, settings_template, context)
         stored_hash = row.get("password_hash", "")
         try:
             ok = bcrypt.checkpw(current_password.encode("utf-8"), stored_hash.encode("utf-8"))
@@ -346,7 +353,7 @@ def settings_view(request):
             ok = False
         if not ok:
             context["pw_error"] = "Password is incorrect."
-            return render(request, "portal/settings.html", context)
+            return render(request, settings_template, context)
         new_hash = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         conn = None
         try:
@@ -365,8 +372,8 @@ def settings_view(request):
             if conn:
                 conn.close()
         context["pw_success"] = "SUCCESSFULL PASSWORD CHANGE"
-        return render(request, "portal/settings.html", context)
-    return render(request, "portal/settings.html", context)
+        return render(request, settings_template, context)
+    return render(request, settings_template, context)
 
 
 @require_login
@@ -379,15 +386,52 @@ def privacy_view(request):
 
 @require_login
 def messages_view(request):
-    context = {
-        "username": request.session.get("display_name") or request.session.get("email"),
+    role_id = int(request.session.get("role_id", 0))
+    user_id = int(request.session["user_id"])
+    username = request.session.get("display_name") or request.session.get("email")
+    if role_id == 2:
+        conn = None
+        try:
+            conn = get_connection()
+            cur = conn.cursor(dictionary=True)
+            cur.execute(
+                """
+                SELECT m.id, m.thread_id, m.sender_id, m.receiver_id,
+                       m.body, m.sent_at, m.is_read, mt.subject
+                FROM messages m
+                LEFT JOIN message_threads mt ON mt.id = m.thread_id
+                WHERE m.sender_id = %s OR m.receiver_id = %s
+                ORDER BY m.sent_at DESC
+                LIMIT 50
+                """,
+                (user_id, user_id),
+            )
+            doctor_messages = cur.fetchall()
+        finally:
+            if conn:
+                conn.close()
+        return render(request, "portal/doctor_messages.html", {
+            "username": username,
+            "doctor_messages": doctor_messages,
+        })
+    if role_id == 6:
+        return render(request, "portal/admin_messages.html", {
+            "username": username,
+            "portal_messages": _get_placeholder_messages(),
+        })
+    return render(request, "portal/messages.html", {
+        "username": username,
         "portal_messages": _get_placeholder_messages(),
-    }
-    return render(request, "portal/messages.html", context)
+    })
 
 
 @require_login
 def dashboard_view(request):
+    role_id = int(request.session.get("role_id", 0))
+    if role_id == 2:
+        return redirect("portal:doctor_dashboard")
+    if role_id == 6:
+        return redirect("portal:admin_dashboard")
     user_id = int(request.session["user_id"])
     _create_upcoming_appointment_reminders(user_id)
     portal_messages = _get_placeholder_messages()
@@ -446,6 +490,7 @@ def profile_view(request):
 
 @require_login
 def notifications_view(request):
+    role_id = int(request.session.get("role_id", 0))
     user_id = int(request.session["user_id"])
     _create_upcoming_appointment_reminders(user_id)
     context = {
@@ -453,6 +498,10 @@ def notifications_view(request):
         "notif_unread_count": get_unread_count(user_id),
         "notifications": list_notifications(user_id),
     }
+    if role_id == 2:
+        return render(request, "portal/doctor_notifications.html", context)
+    if role_id == 6:
+        return render(request, "portal/admin_notifications.html", context)
     return render(request, "portal/notifications.html", context)
 
 
@@ -474,22 +523,111 @@ def notifications_mark_all_read(request):
 
 @require_permission(VIEW_LOGIN_HISTORY)
 def login_history_view(request):
-    return JsonResponse({"ok": True, "permission": VIEW_LOGIN_HISTORY})
+    conn = None
+    rows = []
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute("""
+            SELECT lh.id, lh.user_id, u.email, lh.ip_address,
+                   lh.user_agent, lh.success, lh.login_at
+            FROM login_history lh
+            LEFT JOIN users u ON u.id = lh.user_id
+            ORDER BY lh.login_at DESC
+            LIMIT 200
+        """)
+        rows = cur.fetchall()
+    finally:
+        if conn:
+            conn.close()
+    return render(request, "portal/login_history.html", {
+        "username": request.session.get("display_name") or request.session.get("email"),
+        "rows": rows,
+    })
 
 
 @require_permission(MANAGE_USERS)
 def manage_users_view(request):
-    return JsonResponse({"ok": True, "permission": MANAGE_USERS})
+    conn = None
+    users = []
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute("""
+            SELECT u.id, u.email, u.first_name, u.last_name,
+                   u.is_active, u.created_at, r.name as role_name
+            FROM users u
+            LEFT JOIN roles r ON r.id = u.role_id
+            ORDER BY u.id ASC
+        """)
+        users = cur.fetchall()
+    finally:
+        if conn:
+            conn.close()
+    active_users = sum(1 for u in users if u["is_active"])
+    return render(request, "portal/manage_users.html", {
+        "username": request.session.get("display_name") or request.session.get("email"),
+        "users": users,
+        "active_users": active_users,
+    })
 
 
 @require_permission(MANAGE_ROLES_PERMISSIONS)
 def manage_roles_permissions_view(request):
-    return JsonResponse({"ok": True, "permission": MANAGE_ROLES_PERMISSIONS})
+    conn = None
+    rows = []
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute("""
+            SELECT u.id, u.email, u.first_name, u.last_name,
+                   u.is_active, r.name AS role_name
+            FROM users u
+            LEFT JOIN roles r ON r.id = u.role_id
+            ORDER BY r.name ASC, u.email ASC
+        """)
+        rows = cur.fetchall()
+    finally:
+        if conn:
+            conn.close()
+    return render(request, "portal/manage_roles.html", {
+        "username": request.session.get("display_name") or request.session.get("email"),
+        "rows": rows,
+    })
 
 
 @require_permission(MANAGE_SESSIONS)
 def manage_sessions_view(request):
-    return JsonResponse({"ok": True, "permission": MANAGE_SESSIONS})
+    from datetime import datetime as dt
+    conn = None
+    sessions = []
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute("""
+            SELECT s.id, s.user_id, u.email,
+                   s.created_at, s.expires_at, s.revoked_at
+            FROM sessions s
+            LEFT JOIN users u ON u.id = s.user_id
+            ORDER BY s.created_at DESC
+            LIMIT 200
+        """)
+        now = dt.utcnow()
+        for row in cur.fetchall():
+            if row["revoked_at"]:
+                row["status"] = "revoked"
+            elif row["expires_at"] and row["expires_at"] < now:
+                row["status"] = "expired"
+            else:
+                row["status"] = "active"
+            sessions.append(row)
+    finally:
+        if conn:
+            conn.close()
+    return render(request, "portal/manage_sessions.html", {
+        "username": request.session.get("display_name") or request.session.get("email"),
+        "sessions": sessions,
+    })
 
 
 @require_permission(MANAGE_NOTIFICATIONS)
@@ -755,9 +893,10 @@ def appointments_filtered_view(request):
     finally:
         if conn:
             conn.close()
+    template = "portal/doctor_appointments.html" if role_id == 2 else "portal/appointments.html"
     return render(
         request,
-        "portal/appointments.html",
+        template,
         {
             "username": request.session.get("display_name") or request.session.get("email"),
             "appointments": rows,
@@ -1369,10 +1508,12 @@ def accessibility_view(request):
         {
             "username": request.session.get("display_name") or request.session.get("email"),
             "guidelines": [
-                "You MUST KINDLY use clear, readable text on every single forum.",
-                "Messages with images must also have some short sentence description.",
-                "Use strong color contrast for text and controls.",
-                "Keep yoiur layouts consistent, dont clutter your screens, don't go crazy like vishu",
+                "Use clear, readable text (minimum 16px body size) with sufficient white space on every page.",
+                "All images and visual elements must include a descriptive alt-text or caption for screen reader users.",
+                "Maintain WCAG 2.1 AA color contrast ratios (at least 4.5:1 for normal text, 3:1 for large text) for all text and interactive controls.",
+                "Maintain consistent, uncluttered layouts across all pages to reduce cognitive load and support users with attention or memory impairments.",
+                "All interactive elements (buttons, links, form fields) must be keyboard-navigable and include visible focus indicators.",
+                "Provide clear error messages with specific guidance when a form submission fails, and associate labels explicitly with their input fields.",
             ],
         },
     )

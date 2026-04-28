@@ -67,8 +67,8 @@ urlpatterns = [
 
     path("contact/", views.contact, name="contact"),
 
-    path("admin/login-history/", views.login_history_view, name="view_login_history"),
-    path("admin/users/", views.manage_users_view, name="manage_users"),
-    path("admin/sessions/", views.manage_sessions_view, name="manage_sessions"),
-    path("admin/roles/", views.manage_roles_permissions_view, name="manage_roles_permissions"),
+    path("manage/login-history/", views.login_history_view, name="view_login_history"),
+    path("manage/users/", views.manage_users_view, name="manage_users"),
+    path("manage/sessions/", views.manage_sessions_view, name="manage_sessions"),
+    path("manage/roles/", views.manage_roles_permissions_view, name="manage_roles_permissions"),
 ]

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(python -c \"import portal.views; print\\('views.py imports cleanly'\\)\")",
+      "Bash(python *)"
+    ]
+  }
+}
